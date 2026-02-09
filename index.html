@@ -4,8 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- Título Principal -->
     <title>Gerenciamento</title>
     <meta name="description" content="Controle financeiro de empreitada e pagamentos semanais.">
+
+    <!-- CONFIGURAÇÃO DO LINK PREVIEW (WHATSAPP/FACEBOOK) -->
+    <meta property="og:title" content="Gerenciamento de Pagamentos">
+    <meta property="og:description" content="Controle financeiro de obra. Valor total, pagos e saldo restante.">
+    <meta property="og:image" content="https://iili.io/fpiTKyF.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="800">
+    <meta property="og:image:height" content="800">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
 
     <!-- Configurações PWA -->
     <meta name="theme-color" content="#f1f5f9">
@@ -88,7 +99,7 @@
                 </div>
             </div>
         </div>
-
+        
         <!-- Barra Progresso -->
         <div class="bg-white px-5 py-4 rounded-xl shadow-sm border border-slate-200">
             <div class="flex justify-between text-xs mb-2 font-semibold text-slate-600 uppercase tracking-wide">
@@ -98,7 +109,7 @@
                 <div id="mainProgressBar" class="progress-bar bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-sm" style="width: 0%"></div>
             </div>
         </div>
-        
+
         <!-- Form -->
         <div class="bg-white p-5 rounded-2xl shadow-md border-t-4 border-blue-600 relative transition-all duration-300" id="formContainer">
             <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2" id="formTitle">
@@ -176,7 +187,7 @@
             loadData(); render(); lucide.createIcons();
             if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
         });
-        
+
         function loadData() {
             const savedPayments = localStorage.getItem('artemioApp_payments');
             const savedGoal = localStorage.getItem('artemioApp_goal');
@@ -196,7 +207,7 @@
             let valStr = amountInput.value.replace(',', '.');
             const value = parseFloat(valStr);
             if (isNaN(value) || value <= 0) { alert("Valor inválido."); return; }
-
+            
             if (editingId) {
                 state.payments = state.payments.map(p => p.id === editingId ? { ...p, description: descInput.value.trim(), amount: value } : p);
                 cancelEdit();
@@ -359,4 +370,3 @@
     </script>
 </body>
 </html>
-        
