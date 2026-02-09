@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <title>Gerenciamento de Pagamentos</title>
+    <title>Gerenciamento</title>
     <meta name="description" content="Controle financeiro de empreitada e pagamentos semanais.">
 
     <!-- Configurações PWA -->
@@ -12,6 +12,9 @@
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" href="https://iili.io/fpiTKyF.jpg">
     <link rel="apple-touch-icon" href="https://iili.io/fpiTKyF.jpg">
+    <meta name="apple-mobile-web-app-title" content="Gerenciamento">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
     <!-- Bibliotecas -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -71,7 +74,7 @@
                     <i data-lucide="layers" size="24"></i>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
                     <div class="flex items-center gap-1.5 mb-2 text-green-600 text-[10px] font-bold uppercase"><i data-lucide="check-circle" size="12"></i> Pago</div>
@@ -95,7 +98,7 @@
                 <div id="mainProgressBar" class="progress-bar bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-sm" style="width: 0%"></div>
             </div>
         </div>
-
+        
         <!-- Form -->
         <div class="bg-white p-5 rounded-2xl shadow-md border-t-4 border-blue-600 relative transition-all duration-300" id="formContainer">
             <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2" id="formTitle">
@@ -137,10 +140,6 @@
                 <div class="bg-slate-50 p-4 rounded-full mb-3"><i data-lucide="calendar" size="32" class="text-slate-300"></i></div>
                 <p class="text-sm">Nenhum pagamento registrado.</p>
             </div>
-            <div id="emptyState" class="p-10 text-center text-slate-400 flex flex-col items-center justify-center flex-grow">
-                <div class="bg-slate-50 p-4 rounded-full mb-3"><i data-lucide="calendar" size="32" class="text-slate-300"></i></div>
-                <p class="text-sm">Nenhum pagamento registrado.</p>
-            </div>
             <div id="paymentsList" class="divide-y divide-slate-100 hidden max-h-[500px] overflow-y-auto"></div>
         </div>
     </div>
@@ -177,7 +176,7 @@
             loadData(); render(); lucide.createIcons();
             if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
         });
-
+        
         function loadData() {
             const savedPayments = localStorage.getItem('artemioApp_payments');
             const savedGoal = localStorage.getItem('artemioApp_goal');
@@ -360,3 +359,4 @@
     </script>
 </body>
 </html>
+        
