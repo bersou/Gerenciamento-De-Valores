@@ -1,0 +1,22 @@
+{
+  "name": "Gerenciamento de Pagamentos",
+  "short_name": "Pagamentos",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#f1f5f9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://iili.io/fpiTKyF.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://iili.io/fpiTKyF.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
+
