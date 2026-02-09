@@ -9,11 +9,7 @@
 
     <!-- Configurações PWA -->
     <meta name="theme-color" content="#f1f5f9">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Pagamentos">
-
-    <!-- ÍCONE ATUALIZADO COM SUA IMAGEM -->
+    <link rel="manifest" href="./manifest.json">
     <link rel="icon" href="https://iili.io/fpiTKyF.jpg">
     <link rel="apple-touch-icon" href="https://iili.io/fpiTKyF.jpg">
 
@@ -22,60 +18,52 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- ExcelJS e FileSaver (Para Excel) -->
+    <!-- ExcelJS e FileSaver -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
-    <!-- Chart.js + DataLabels Plugin (Para gerar o gráfico com valores) -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            -webkit-tap-highlight-color: transparent;
-            background-color: #f1f5f9; /* Slate 100 - Fundo Claro */
-        }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; background-color: #f1f5f9; }
         .progress-bar { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
         .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
         input { font-size: 16px !important; }
         .touch-target { min-height: 48px; }
     </style>
 </head>
 <body class="text-slate-800 min-h-screen pb-safe">
 
-    <!-- Canvas Oculto para Gerar Gráfico para o Excel -->
+    <!-- Canvas Oculto -->
     <canvas id="excelChartCanvas" width="600" height="600" style="display:none;"></canvas>
 
     <div class="max-w-xl mx-auto min-h-screen flex flex-col p-4 md:p-6 space-y-5 fade-in">
         
-        <!-- Cabeçalho com Logo Personalizado -->
-        <div class="text-center py-6">
-            <!-- Container da Imagem -->
+        <!-- Cabeçalho -->
+        <div class="text-center py-6 relative">
             <div class="inline-block relative group">
                 <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-500"></div>
                 <div class="relative p-1 bg-white rounded-2xl shadow-xl shadow-slate-300 mb-4 ring-4 ring-white overflow-hidden">
-                     <img 
-                        src="https://iili.io/fpiTKyF.jpg" 
-                        alt="Logo da Aplicação" 
-                        class="w-24 h-24 rounded-xl object-cover"
-                     >
+                     <img src="https://iili.io/fpiTKyF.jpg" alt="Logo" class="w-24 h-24 rounded-xl object-cover">
                 </div>
             </div>
             <h1 class="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">Gerenciamento de Pagamentos</h1>
+            
+            <!-- Botão de Instalar (Aparece via JS) -->
+            <button id="installAppBtn" class="hidden mt-4 bg-slate-900 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 mx-auto hover:bg-slate-800 transition">
+                <i data-lucide="download" size="16"></i> Instalar App
+            </button>
         </div>
 
         <!-- Cards de Resumo -->
         <div class="grid grid-cols-1 gap-3">
-            
-            <!-- Card Principal -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
                     <div class="flex items-center gap-2 mb-1 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                        <i data-lucide="briefcase" size="14"></i>
-                        Valor Da Empreitada
+                        <i data-lucide="briefcase" size="14"></i> Valor Da Empreitada
                     </div>
                     <div class="text-3xl font-bold text-slate-800" id="totalGoalDisplay">R$ 3.500,00</div>
                 </div>
@@ -83,90 +71,52 @@
                     <i data-lucide="layers" size="24"></i>
                 </div>
             </div>
-
+            
             <div class="grid grid-cols-2 gap-3">
-                <!-- Card Pago -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
-                    <div class="flex items-center gap-1.5 mb-2 text-green-600 text-[10px] font-bold uppercase">
-                        <i data-lucide="check-circle" size="12"></i>
-                        Pago
-                    </div>
+                    <div class="flex items-center gap-1.5 mb-2 text-green-600 text-[10px] font-bold uppercase"><i data-lucide="check-circle" size="12"></i> Pago</div>
                     <div class="text-xl md:text-2xl font-bold text-green-600" id="totalPaidDisplay">R$ 0,00</div>
                     <p class="text-[10px] text-slate-400 mt-1" id="paymentCountDisplay">0 pgto(s)</p>
                 </div>
-
-                <!-- Card Resta -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between relative overflow-hidden">
-                    <div class="flex items-center gap-1.5 mb-2 text-slate-500 text-[10px] font-bold uppercase">
-                        <i data-lucide="trending-down" size="12"></i>
-                        Resta
-                    </div>
+                    <div class="flex items-center gap-1.5 mb-2 text-slate-500 text-[10px] font-bold uppercase"><i data-lucide="trending-down" size="12"></i> Resta</div>
                     <div class="text-xl md:text-2xl font-bold text-red-600" id="remainingDisplay">R$ 3.500,00</div>
                     <div id="cardProgressBar" class="absolute bottom-0 left-0 h-1 bg-green-500 transition-all duration-500" style="width: 0%"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Barra de Progresso -->
+        <!-- Barra Progresso -->
         <div class="bg-white px-5 py-4 rounded-xl shadow-sm border border-slate-200">
             <div class="flex justify-between text-xs mb-2 font-semibold text-slate-600 uppercase tracking-wide">
-                <span>Progresso</span>
-                <span id="progressText">0%</span>
+                <span>Progresso</span> <span id="progressText">0%</span>
             </div>
             <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                <div 
-                    id="mainProgressBar"
-                    class="progress-bar bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-sm"
-                    style="width: 0%"
-                ></div>
+                <div id="mainProgressBar" class="progress-bar bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-sm" style="width: 0%"></div>
             </div>
         </div>
 
-        <!-- Formulário de Pagamento/Edição -->
+        <!-- Form -->
         <div class="bg-white p-5 rounded-2xl shadow-md border-t-4 border-blue-600 relative transition-all duration-300" id="formContainer">
             <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2" id="formTitle">
-                <span class="bg-blue-100 text-blue-600 rounded-lg p-1.5"><i data-lucide="plus" size="18"></i></span>
-                Registrar Pagamento
+                <span class="bg-blue-100 text-blue-600 rounded-lg p-1.5"><i data-lucide="plus" size="18"></i></span> Registrar Pagamento
             </h2>
             <form id="addForm" class="flex flex-col gap-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Descrição</label>
-                        <input
-                            type="text"
-                            id="descInput"
-                            placeholder="Ex: Semanal"
-                            class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm font-medium touch-target"
-                        >
+                        <input type="text" id="descInput" placeholder="Ex: Semanal" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm font-medium touch-target">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Valor (R$)</label>
-                        <input
-                            type="number"
-                            id="amountInput"
-                            inputmode="decimal"
-                            step="0.01"
-                            placeholder="0,00"
-                            class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition font-mono font-bold text-lg text-slate-800 touch-target"
-                        >
+                        <input type="number" id="amountInput" inputmode="decimal" step="0.01" placeholder="0,00" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition font-mono font-bold text-lg text-slate-800 touch-target">
                     </div>
                 </div>
-                
                 <div class="flex gap-3">
-                    <button 
-                        type="button"
-                        id="cancelEditBtn"
-                        onclick="cancelEdit()"
-                        class="hidden w-1/3 bg-slate-200 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-300 flex justify-center items-center gap-2 transition active:scale-[0.98]"
-                    >
+                    <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="hidden w-1/3 bg-slate-200 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-300 flex justify-center items-center gap-2 transition active:scale-[0.98]">
                         <i data-lucide="x" size="20"></i> Cancelar
                     </button>
-                    
-                    <button 
-                        type="submit"
-                        id="submitBtn"
-                        class="w-full bg-blue-600 active:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 flex justify-center items-center gap-2 touch-target transition-transform active:scale-[0.98]"
-                    >
+                    <button type="submit" id="submitBtn" class="w-full bg-blue-600 active:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 flex justify-center items-center gap-2 touch-target transition-transform active:scale-[0.98]">
                         <i data-lucide="save" size="20"></i> Salvar Pagamento
                     </button>
                 </div>
@@ -177,177 +127,122 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-grow">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
                 <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                    <i data-lucide="history" class="text-slate-400" size="18"></i>
-                    Histórico
+                    <i data-lucide="history" class="text-slate-400" size="18"></i> Histórico
                 </h2>
-                
-                <button 
-                    onclick="exportToExcel()"
-                    class="text-xs font-bold bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition flex items-center gap-2 active:scale-95 border border-green-200"
-                >
-                    <i data-lucide="file-spreadsheet" size="16"></i>
-                    Baixar Excel
+                <button onclick="exportToExcel()" class="text-xs font-bold bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition flex items-center gap-2 active:scale-95 border border-green-200">
+                    <i data-lucide="file-spreadsheet" size="16"></i> Baixar Excel
                 </button>
             </div>
-            
             <div id="emptyState" class="p-10 text-center text-slate-400 flex flex-col items-center justify-center flex-grow">
-                <div class="bg-slate-50 p-4 rounded-full mb-3">
-                    <i data-lucide="calendar" size="32" class="text-slate-300"></i>
-                </div>
+                <div class="bg-slate-50 p-4 rounded-full mb-3"><i data-lucide="calendar" size="32" class="text-slate-300"></i></div>
                 <p class="text-sm">Nenhum pagamento registrado.</p>
             </div>
-
-            <div id="paymentsList" class="divide-y divide-slate-100 hidden max-h-[500px] overflow-y-auto">
-                <!-- Lista via JS -->
+            <div id="emptyState" class="p-10 text-center text-slate-400 flex flex-col items-center justify-center flex-grow">
+                <div class="bg-slate-50 p-4 rounded-full mb-3"><i data-lucide="calendar" size="32" class="text-slate-300"></i></div>
+                <p class="text-sm">Nenhum pagamento registrado.</p>
             </div>
+            <div id="paymentsList" class="divide-y divide-slate-100 hidden max-h-[500px] overflow-y-auto"></div>
         </div>
-        
     </div>
 
-    <!-- Scripts -->
     <script>
-        // --- Estado ---
-        let state = {
-            totalGoal: 3500,
-            payments: []
-        };
-        
-        let editingId = null; // Variável para controlar edição
-
-        // --- Init ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            render();
-            lucide.createIcons();
-            if (typeof ChartDataLabels !== 'undefined') {
-                Chart.register(ChartDataLabels);
+        // --- PWA: Service Worker & Instalação ---
+        let deferredPrompt;
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW registrado', reg));
+            });
+        }
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installAppBtn').classList.remove('hidden');
+        });
+        document.getElementById('installAppBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('installAppBtn').classList.add('hidden');
+                }
+                deferredPrompt = null;
             }
         });
 
-        // --- LocalStorage ---
+        // --- Lógica do App ---
+        let state = { totalGoal: 3500, payments: [] };
+        let editingId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData(); render(); lucide.createIcons();
+            if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+        });
+
         function loadData() {
             const savedPayments = localStorage.getItem('artemioApp_payments');
             const savedGoal = localStorage.getItem('artemioApp_goal');
             if (savedPayments) state.payments = JSON.parse(savedPayments);
             if (savedGoal) state.totalGoal = parseFloat(savedGoal);
         }
-
         function saveData() {
             localStorage.setItem('artemioApp_payments', JSON.stringify(state.payments));
             localStorage.setItem('artemioApp_goal', state.totalGoal.toString());
             render();
         }
 
-        // --- Ações de Formulário (Adicionar / Editar) ---
         document.getElementById('addForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const amountInput = document.getElementById('amountInput');
             const descInput = document.getElementById('descInput');
-            
             let valStr = amountInput.value.replace(',', '.');
             const value = parseFloat(valStr);
-            
-            if (isNaN(value) || value <= 0) {
-                alert("Valor inválido.");
-                return;
-            }
+            if (isNaN(value) || value <= 0) { alert("Valor inválido."); return; }
 
             if (editingId) {
-                // MODO EDIÇÃO
-                state.payments = state.payments.map(p => {
-                    if (p.id === editingId) {
-                        return { ...p, description: descInput.value.trim(), amount: value };
-                    }
-                    return p;
-                });
-                cancelEdit(); // Sai do modo edição
+                state.payments = state.payments.map(p => p.id === editingId ? { ...p, description: descInput.value.trim(), amount: value } : p);
+                cancelEdit();
             } else {
-                // MODO CRIAÇÃO
                 const now = new Date();
-                const newPayment = {
-                    id: Date.now(),
-                    description: descInput.value.trim() || 'Pagamento',
-                    amount: value,
-                    date: now.toLocaleDateString('pt-BR'),
-                    timestamp: now
-                };
-                state.payments.unshift(newPayment);
-                
-                // Feedback visual de sucesso
+                state.payments.unshift({ id: Date.now(), description: descInput.value.trim() || 'Pagamento', amount: value, date: now.toLocaleDateString('pt-BR'), timestamp: now });
                 const btn = document.getElementById('submitBtn');
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = '<i data-lucide="check" size="20"></i> Salvo!';
-                btn.classList.add('bg-green-600');
-                btn.classList.remove('bg-blue-600');
+                btn.classList.add('bg-green-600', 'text-white'); btn.classList.remove('bg-blue-600');
                 lucide.createIcons();
-                setTimeout(() => {
-                    if(!editingId) { // Só reseta se não tiver entrado em modo edição nesse meio tempo
-                        btn.innerHTML = originalHTML;
-                        btn.classList.remove('bg-green-600');
-                        btn.classList.add('bg-blue-600');
-                        lucide.createIcons();
-                    }
-                }, 1500);
+                setTimeout(() => { if(!editingId) { btn.innerHTML = originalHTML; btn.classList.remove('bg-green-600'); btn.classList.add('bg-blue-600'); lucide.createIcons(); } }, 1500);
             }
-
-            amountInput.value = '';
-            descInput.value = '';
+            amountInput.value = ''; descInput.value = '';
             if(window.innerWidth > 768 && !editingId) descInput.focus();
-            
             saveData();
         });
 
-        // Função para iniciar edição
         function startEdit(id) {
             const payment = state.payments.find(p => p.id === id);
             if(!payment) return;
-
-            // Preenche formulário
             document.getElementById('descInput').value = payment.description;
             document.getElementById('amountInput').value = payment.amount;
             editingId = id;
-
-            // Muda visual do formulário
+            
             const formContainer = document.getElementById('formContainer');
-            formContainer.classList.remove('border-blue-600');
-            formContainer.classList.add('border-amber-500', 'ring-2', 'ring-amber-100');
-
-            const title = document.getElementById('formTitle');
-            title.innerHTML = '<span class="bg-amber-100 text-amber-600 rounded-lg p-1.5"><i data-lucide="pencil" size="18"></i></span> Editar Pagamento';
-
+            formContainer.classList.remove('border-blue-600'); formContainer.classList.add('border-amber-500', 'ring-2', 'ring-amber-100');
+            document.getElementById('formTitle').innerHTML = '<span class="bg-amber-100 text-amber-600 rounded-lg p-1.5"><i data-lucide="pencil" size="18"></i></span> Editar Pagamento';
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerHTML = '<i data-lucide="refresh-cw" size="20"></i> Atualizar';
-            submitBtn.classList.remove('bg-blue-600', 'shadow-blue-200');
-            submitBtn.classList.add('bg-amber-500', 'hover:bg-amber-600', 'shadow-amber-200');
-
-            // Mostra botão cancelar
+            submitBtn.classList.remove('bg-blue-600', 'shadow-blue-200'); submitBtn.classList.add('bg-amber-500', 'hover:bg-amber-600', 'shadow-amber-200');
             document.getElementById('cancelEditBtn').classList.remove('hidden');
-
             lucide.createIcons();
-            
-            // Rola até o topo suavemente
             document.getElementById('addForm').scrollIntoView({behavior: 'smooth', block: 'center'});
         }
 
-        // Função para cancelar edição
         function cancelEdit() {
             editingId = null;
-            document.getElementById('amountInput').value = '';
-            document.getElementById('descInput').value = '';
-
-            // Restaura visual original
+            document.getElementById('amountInput').value = ''; document.getElementById('descInput').value = '';
             const formContainer = document.getElementById('formContainer');
-            formContainer.classList.add('border-blue-600');
-            formContainer.classList.remove('border-amber-500', 'ring-2', 'ring-amber-100');
-
-            const title = document.getElementById('formTitle');
-            title.innerHTML = '<span class="bg-blue-100 text-blue-600 rounded-lg p-1.5"><i data-lucide="plus" size="18"></i></span> Registrar Pagamento';
-
+            formContainer.classList.add('border-blue-600'); formContainer.classList.remove('border-amber-500', 'ring-2', 'ring-amber-100');
+            document.getElementById('formTitle').innerHTML = '<span class="bg-blue-100 text-blue-600 rounded-lg p-1.5"><i data-lucide="plus" size="18"></i></span> Registrar Pagamento';
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerHTML = '<i data-lucide="save" size="20"></i> Salvar Pagamento';
-            submitBtn.classList.add('bg-blue-600', 'shadow-blue-200');
-            submitBtn.classList.remove('bg-amber-500', 'hover:bg-amber-600', 'shadow-amber-200');
-
+            submitBtn.classList.add('bg-blue-600', 'shadow-blue-200'); submitBtn.classList.remove('bg-amber-500', 'hover:bg-amber-600', 'shadow-amber-200');
             document.getElementById('cancelEditBtn').classList.add('hidden');
             lucide.createIcons();
         }
@@ -355,141 +250,72 @@
         function deletePayment(id) {
             if(confirm('Apagar registro?')) {
                 state.payments = state.payments.filter(p => p.id !== id);
-                if(editingId === id) cancelEdit(); // Se deletar o que está editando, cancela edição
+                if(editingId === id) cancelEdit();
                 saveData();
             }
         }
 
         const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
-        // --- GERAÇÃO DE GRÁFICO COM VALORES (DATALABELS) ---
         async function generateChartImage(totalPaid, remaining) {
             const canvas = document.getElementById('excelChartCanvas');
             const ctx = canvas.getContext('2d');
-            
-            if (window.excelChart instanceof Chart) {
-                window.excelChart.destroy();
-            }
-
+            if (window.excelChart instanceof Chart) window.excelChart.destroy();
             return new Promise((resolve) => {
                 window.excelChart = new Chart(ctx, {
                     type: 'doughnut',
-                    data: {
-                        labels: ['Pago', 'Restante'],
-                        datasets: [{
-                            data: [totalPaid, Math.max(0, remaining)],
-                            backgroundColor: ['#16a34a', '#dc2626'], // Verde e Vermelho
-                            borderWidth: 0,
-                        }]
-                    },
+                    data: { labels: ['Pago', 'Restante'], datasets: [{ data: [totalPaid, Math.max(0, remaining)], backgroundColor: ['#16a34a', '#dc2626'], borderWidth: 0 }] },
                     options: {
-                        responsive: false,
-                        layout: { padding: 20 },
+                        responsive: false, layout: { padding: 20 },
                         plugins: {
-                            legend: { 
-                                position: 'bottom', 
-                                labels: { 
-                                    font: { size: 24, weight: 'bold' }, // FONTE AUMENTADA
-                                    padding: 20
-                                } 
-                            },
-                            title: { 
-                                display: true, 
-                                text: 'Status do Pagamento',
-                                font: { size: 28, weight: 'bold' },
-                                padding: { bottom: 20 }
-                            },
-                            datalabels: {
-                                color: '#ffffff',
-                                font: { weight: 'bold', size: 18 },
-                                formatter: (value) => {
-                                    if (value <= 0) return '';
-                                    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
-                                },
-                                anchor: 'center',
-                                align: 'center',
-                                backgroundColor: 'rgba(0,0,0,0.3)',
-                                borderRadius: 4,
-                                padding: 6
-                            }
+                            legend: { position: 'bottom', labels: { font: { size: 24, weight: 'bold' }, padding: 20 } },
+                            title: { display: true, text: 'Status do Pagamento', font: { size: 28, weight: 'bold' }, padding: { bottom: 20 } },
+                            datalabels: { color: '#ffffff', font: { weight: 'bold', size: 18 }, formatter: (value) => value <= 0 ? '' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value), anchor: 'center', align: 'center', backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 4, padding: 6 }
                         },
-                        animation: {
-                            onComplete: () => {
-                                resolve(canvas.toDataURL('image/png'));
-                            }
-                        }
+                        animation: { onComplete: () => resolve(canvas.toDataURL('image/png')) }
                     },
                     plugins: [ChartDataLabels]
                 });
             });
         }
 
-        // --- EXPORTAR EXCEL ---
         async function exportToExcel() {
-            if (state.payments.length === 0) {
-                alert("Sem dados para exportar.");
-                return;
-            }
-
+            if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
             const remaining = state.totalGoal - totalPaid;
             const chartBase64 = await generateChartImage(totalPaid, remaining);
             const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Pagamentos', { views: [{ showGridLines: false }] });
+            worksheet.columns = [{ header: 'Data', key: 'date', width: 15 }, { header: 'Descrição', key: 'description', width: 30 }, { header: 'Valor (R$)', key: 'amount', width: 20 }, { width: 5 }, { width: 60 }];
             
-            // CONFIGURAR PLANILHA SEM LINHAS DE GRADE (showGridLines: false)
-            const worksheet = workbook.addWorksheet('Pagamentos', {
-                views: [{ showGridLines: false }]
-            });
-
-            worksheet.columns = [
-                { header: 'Data', key: 'date', width: 15 },
-                { header: 'Descrição', key: 'description', width: 30 },
-                { header: 'Valor (R$)', key: 'amount', width: 20 },
-                { width: 5 }, 
-                { width: 60 }
-            ];
-
             const headerRow = worksheet.getRow(1);
             headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
             headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } };
             headerRow.alignment = { horizontal: 'center' };
-
+            
             state.payments.forEach(p => {
-                const row = worksheet.addRow({
-                    date: p.date,
-                    description: p.description,
-                    amount: p.amount
-                });
+                const row = worksheet.addRow({ date: p.date, description: p.description, amount: p.amount });
                 row.getCell('amount').numFmt = '"R$" #,##0.00';
                 row.getCell('date').alignment = { horizontal: 'center' };
-                // Adiciona bordas apenas nas células de dados para manter o visual limpo no resto
-                row.eachCell((cell) => {
-                     if(cell.col <= 3) {
-                        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-                     }
-                });
+                row.eachCell((cell) => { if(cell.col <= 3) cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; });
             });
-
+            
             const totalRow = worksheet.addRow({ description: 'TOTAL PAGO:', amount: totalPaid });
             totalRow.font = { bold: true };
             totalRow.getCell('description').alignment = { horizontal: 'right' };
             totalRow.getCell('amount').numFmt = '"R$" #,##0.00';
             totalRow.getCell('amount').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCFCE7' } };
-            
-            // Bordas no total
             totalRow.getCell('description').border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
             totalRow.getCell('amount').border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-
-
+            
             const imageId = workbook.addImage({ base64: chartBase64, extension: 'png' });
             worksheet.addImage(imageId, { tl: { col: 4, row: 1 }, br: { col: 5, row: 22 } });
-
+            
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             saveAs(blob, `Controle_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
         }
 
-        // --- Render ---
         function render() {
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
             const remaining = state.totalGoal - totalPaid;
@@ -498,69 +324,32 @@
             document.getElementById('totalGoalDisplay').innerText = formatCurrency(state.totalGoal);
             document.getElementById('totalPaidDisplay').innerText = formatCurrency(totalPaid);
             document.getElementById('paymentCountDisplay').innerText = `${state.payments.length} pgto(s)`;
-            
             const remainingEl = document.getElementById('remainingDisplay');
             remainingEl.innerText = formatCurrency(remaining);
-            remainingEl.className = remaining <= 0 
-                ? "text-xl md:text-2xl font-bold text-green-600" 
-                : "text-xl md:text-2xl font-bold text-red-600";
-
+            remainingEl.className = remaining <= 0 ? "text-xl md:text-2xl font-bold text-green-600" : "text-xl md:text-2xl font-bold text-red-600";
             document.getElementById('cardProgressBar').style.width = `${progress}%`;
             document.getElementById('mainProgressBar').style.width = `${progress}%`;
             document.getElementById('progressText').innerText = `${Math.round(progress)}%`;
 
             const listEl = document.getElementById('paymentsList');
             const emptyEl = document.getElementById('emptyState');
-
-            if (state.payments.length === 0) {
-                listEl.classList.add('hidden');
-                emptyEl.classList.remove('hidden');
-            } else {
-                emptyEl.classList.add('hidden');
-                listEl.classList.remove('hidden');
-                listEl.innerHTML = '';
-
+            if (state.payments.length === 0) { listEl.classList.add('hidden'); emptyEl.classList.remove('hidden'); } 
+            else {
+                emptyEl.classList.add('hidden'); listEl.classList.remove('hidden'); listEl.innerHTML = '';
                 state.payments.forEach(payment => {
                     const item = document.createElement('div');
                     item.className = "p-4 flex items-center justify-between hover:bg-slate-50 transition group";
-                    
-                    // Verifica se este item está sendo editado
                     const isEditing = editingId === payment.id;
                     const bgClass = isEditing ? "bg-amber-50 border-l-4 border-amber-400" : "";
-
                     item.innerHTML = `
                         <div class="flex items-center gap-3 ${bgClass} rounded-lg p-2 transition-colors">
-                            <div class="flex flex-col items-center justify-center bg-white text-slate-600 px-2 py-1.5 rounded-lg border border-slate-200 min-w-[60px] shadow-sm">
-                                <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">DATA</span>
-                                <span class="text-xs font-bold">${payment.date.substring(0, 5)}</span>
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="font-bold text-slate-800 text-sm truncate pr-2">${payment.description}</p>
-                                <p class="text-[10px] text-slate-400 truncate">Em ${payment.date}</p>
-                            </div>
+                            <div class="flex flex-col items-center justify-center bg-white text-slate-600 px-2 py-1.5 rounded-lg border border-slate-200 min-w-[60px] shadow-sm"><span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">DATA</span><span class="text-xs font-bold">${payment.date.substring(0, 5)}</span></div>
+                            <div class="overflow-hidden"><p class="font-bold text-slate-800 text-sm truncate pr-2">${payment.description}</p><p class="text-[10px] text-slate-400 truncate">Em ${payment.date}</p></div>
                         </div>
                         <div class="flex items-center gap-2 pl-2">
-                            <span class="font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1">
-                                - ${formatCurrency(payment.amount)}
-                            </span>
-                            
-                            <!-- Botão Editar -->
-                            <button 
-                                onclick="startEdit(${payment.id})"
-                                class="text-slate-300 hover:text-amber-500 p-2 rounded-full hover:bg-amber-50 transition active:scale-90"
-                                title="Editar"
-                            >
-                                <i data-lucide="pencil" size="16"></i>
-                            </button>
-
-                            <!-- Botão Excluir -->
-                            <button 
-                                onclick="deletePayment(${payment.id})"
-                                class="text-slate-300 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition active:scale-90"
-                                title="Excluir"
-                            >
-                                <i data-lucide="trash-2" size="16"></i>
-                            </button>
+                            <span class="font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1">- ${formatCurrency(payment.amount)}</span>
+                            <button onclick="startEdit(${payment.id})" class="text-slate-300 hover:text-amber-500 p-2 rounded-full hover:bg-amber-50 transition active:scale-90" title="Editar"><i data-lucide="pencil" size="16"></i></button>
+                            <button onclick="deletePayment(${payment.id})" class="text-slate-300 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition active:scale-90" title="Excluir"><i data-lucide="trash-2" size="16"></i></button>
                         </div>
                     `;
                     listEl.appendChild(item);
