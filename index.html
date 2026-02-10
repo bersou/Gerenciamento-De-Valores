@@ -10,7 +10,7 @@
     <!-- Configurações Link Preview -->
     <meta property="og:title" content="Gerenciamento de Pagamentos">
     <meta property="og:description" content="Controle financeiro de obra. Valor total, pagos e saldo restante.">
-    <meta property="og:image" content="https://iili.io/fy7S4jf.jpg">
+    <meta property="og:image" content="https://iili.io/fyYM2Lu.jpg">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="800">
     <meta property="og:image:height" content="800">
@@ -19,8 +19,8 @@
     <!-- Configurações PWA -->
     <meta name="theme-color" content="#f1f5f9">
     <link rel="manifest" href="./manifest.json">
-    <link rel="icon" href="https://iili.io/fy7S4jf.jpg">
-    <link rel="apple-touch-icon"https://iili.io/fy7S4jf.jpg">
+    <link rel="icon" href="https://iili.io/fyYM2Lu.jpg">
+    <link rel="apple-touch-icon" href="https://iili.io/fyYM2Lu.jpg">
     <meta name="apple-mobile-web-app-title" content="Gerenciamento">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -76,7 +76,7 @@
             </form>
         </div>
     </div>
-    
+
     <div class="max-w-xl mx-auto min-h-screen flex flex-col p-4 md:p-6 space-y-5 fade-in">
         
         <!-- Cabeçalho -->
@@ -84,7 +84,7 @@
             <div class="inline-block relative group">
                 <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-500"></div>
                 <div class="relative p-1 bg-white rounded-2xl shadow-xl shadow-slate-300 mb-4 ring-4 ring-white overflow-hidden">
-                     <img src="https://iili.io/fy7S4jf.jpg" alt="Logo" class="w-24 h-24 rounded-xl object-cover">
+                     <img src="https://iili.io/fyYM2Lu.jpg" alt="Logo" class="w-24 h-24 rounded-xl object-cover">
                 </div>
             </div>
             <h1 class="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">Gerenciamento de Pagamentos</h1>
@@ -101,7 +101,6 @@
                         <i data-lucide="briefcase" size="14"></i> Valor Da Empreitada
                     </div>
                     <div class="flex items-center gap-3">
-                        <!-- Valor clicável -->
                         <div class="text-3xl font-bold text-slate-800 cursor-pointer border-b border-dashed border-slate-300 hover:border-blue-500 hover:text-blue-600 transition" onclick="openGoalModal()" id="totalGoalDisplay" title="Clique para editar">R$ 0,00</div>
                         <button onclick="openGoalModal()" class="bg-slate-100 p-2 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition active:scale-95 border border-slate-200">
                             <i data-lucide="pencil" size="16"></i>
@@ -126,7 +125,7 @@
                 </div>
             </div>
         </div>
-
+        
         <!-- Barra Progresso -->
         <div class="bg-white px-5 py-4 rounded-xl shadow-sm border border-slate-200">
             <div class="flex justify-between text-xs mb-2 font-semibold text-slate-600 uppercase tracking-wide">
@@ -181,7 +180,7 @@
             <div id="paymentsList" class="divide-y divide-slate-100 hidden max-h-[500px] overflow-y-auto"></div>
         </div>
     </div>
-    
+
     <script>
         // --- PWA Setup ---
         let deferredPrompt;
@@ -221,7 +220,6 @@
         function openGoalModal() {
             document.getElementById('goalInput').value = state.totalGoal > 0 ? state.totalGoal : '';
             document.getElementById('goalModal').classList.add('active');
-            // Foca no input após animação
             setTimeout(() => document.getElementById('goalInput').focus(), 100);
         }
 
@@ -243,7 +241,6 @@
             }
         });
 
-        // Fecha modal ao clicar fora
         document.getElementById('goalModal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('goalModal')) closeGoalModal();
         });
@@ -412,4 +409,3 @@
     </script>
 </body>
 </html>
-    
