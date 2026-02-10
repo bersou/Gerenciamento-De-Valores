@@ -10,10 +10,12 @@
     <!-- Configurações Link Preview -->
     <meta property="og:title" content="Gerenciamento de Pagamentos">
     <meta property="og:description" content="Controle financeiro de obra. Valor total, pagos e saldo restante.">
+    <!-- Imagem Atualizada -->
     <meta property="og:image" content="https://iili.io/fyYM2Lu.jpg">
     <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:image:width" content="800">
-    <meta property="og:image:height" content="800">
+    <!-- Tamanho Ajustado para coincidir com o arquivo -->
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
     <meta property="og:type" content="website">
 
     <!-- Configurações PWA -->
@@ -253,7 +255,7 @@
             let valStr = amountInput.value.replace(',', '.');
             const value = parseFloat(valStr);
             if (isNaN(value) || value <= 0) { alert("Valor inválido."); return; }
-
+            
             if (editingId) {
                 state.payments = state.payments.map(p => p.id === editingId ? { ...p, description: descInput.value.trim(), amount: value } : p);
                 cancelEdit();
