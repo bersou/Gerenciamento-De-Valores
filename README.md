@@ -53,5 +53,5 @@ Este é um projeto Client-Side. Isso significa que:
 ---
 
 <div align="center">
-Desenvolvido com ❤️ por José bernardo para facilitar o controle financeiro de obras
+Desenvolvido com ❤️ por José Bernardo para facilitar o controle financeiro de obras
 </div>
