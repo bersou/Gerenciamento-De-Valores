@@ -10,10 +10,8 @@
     <!-- Configurações Link Preview -->
     <meta property="og:title" content="Gerenciamento de Pagamentos">
     <meta property="og:description" content="Controle financeiro de obra. Valor total, pagos e saldo restante.">
-    <!-- Imagem Atualizada -->
     <meta property="og:image" content="https://iili.io/fyYM2Lu.jpg">
     <meta property="og:image:type" content="image/jpeg">
-    <!-- Tamanho Ajustado para coincidir com o arquivo -->
     <meta property="og:image:width" content="512">
     <meta property="og:image:height" content="512">
     <meta property="og:type" content="website">
@@ -31,10 +29,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- ExcelJS e FileSaver (Para Excel) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <!-- Chart.js (Para Gráficos) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <!-- jsPDF e AutoTable (Para PDF Profissional) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; background-color: #f1f5f9; }
@@ -127,7 +133,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Barra Progresso -->
         <div class="bg-white px-5 py-4 rounded-xl shadow-sm border border-slate-200">
             <div class="flex justify-between text-xs mb-2 font-semibold text-slate-600 uppercase tracking-wide">
@@ -137,7 +143,7 @@
                 <div id="mainProgressBar" class="progress-bar bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-sm" style="width: 0%"></div>
             </div>
         </div>
-
+        
         <!-- Form -->
         <div class="bg-white p-5 rounded-2xl shadow-md border-t-4 border-blue-600 relative transition-all duration-300" id="formContainer">
             <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2" id="formTitle">
@@ -167,13 +173,19 @@
 
         <!-- Histórico -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-grow">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
-                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl flex-wrap gap-2">
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mr-auto">
                     <i data-lucide="history" class="text-slate-400" size="18"></i> Histórico
                 </h2>
-                <button onclick="exportToExcel()" class="text-xs font-bold bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition flex items-center gap-2 active:scale-95 border border-green-200">
-                    <i data-lucide="file-spreadsheet" size="16"></i> Baixar Excel
-                </button>
+                
+                <div class="flex gap-2">
+                    <button onclick="exportToPDF()" class="text-xs font-bold bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition flex items-center gap-2 active:scale-95 border border-red-200">
+                        <i data-lucide="file-text" size="16"></i> PDF
+                    </button>
+                    <button onclick="exportToExcel()" class="text-xs font-bold bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition flex items-center gap-2 active:scale-95 border border-green-200">
+                        <i data-lucide="file-spreadsheet" size="16"></i> Excel
+                    </button>
+                </div>
             </div>
             <div id="emptyState" class="p-10 text-center text-slate-400 flex flex-col items-center justify-center flex-grow">
                 <div class="bg-slate-50 p-4 rounded-full mb-3"><i data-lucide="calendar" size="32" class="text-slate-300"></i></div>
@@ -255,7 +267,7 @@
             let valStr = amountInput.value.replace(',', '.');
             const value = parseFloat(valStr);
             if (isNaN(value) || value <= 0) { alert("Valor inválido."); return; }
-            
+
             if (editingId) {
                 state.payments = state.payments.map(p => p.id === editingId ? { ...p, description: descInput.value.trim(), amount: value } : p);
                 cancelEdit();
@@ -312,7 +324,7 @@
                 saveData();
             }
         }
-
+        
         const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
         async function generateChartImage(totalPaid, remaining) {
@@ -367,6 +379,104 @@
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             saveAs(blob, `Controle_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
+        }
+
+        // --- NOVA FUNÇÃO DE EXPORTAR PDF ---
+        async function exportToPDF() {
+            if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título e Dados do Cabeçalho
+            doc.setFontSize(22);
+            doc.setTextColor(30, 41, 59); // Slate-800
+            doc.text("Demonstrativo de Pagamentos", 14, 20);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100, 116, 139); // Slate-500
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 14, 28);
+            
+            // Caixa de Resumo
+            const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
+            const remaining = state.totalGoal - totalPaid;
+            
+            doc.setDrawColor(203, 213, 225); // Slate-300
+            doc.setFillColor(248, 250, 252); // Slate-50
+            doc.roundedRect(14, 35, 180, 25, 3, 3, 'FD');
+            
+            doc.setFontSize(10);
+            doc.setTextColor(71, 85, 105); // Slate-600
+            doc.text("VALOR EMPREITADA", 20, 42);
+            doc.text("TOTAL PAGO", 85, 42);
+            doc.text("SALDO RESTANTE", 150, 42);
+            
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(30, 41, 59); // Slate-800
+            doc.text(formatCurrency(state.totalGoal), 20, 50);
+            
+            doc.setTextColor(22, 163, 74); // Green-600
+            doc.text(formatCurrency(totalPaid), 85, 50);
+            
+            doc.setTextColor(220, 38, 38); // Red-600
+            doc.text(formatCurrency(remaining), 150, 50);
+            
+            // Tabela de Dados
+            const tableColumn = ["Data", "Descrição", "Valor Pago"];
+            const tableRows = [];
+
+            state.payments.forEach(payment => {
+                const paymentData = [
+                    payment.date,
+                    payment.description,
+                    formatCurrency(payment.amount)
+                ];
+                tableRows.push(paymentData);
+            });
+
+            // Gerar Tabela com AutoTable
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 65,
+                theme: 'striped',
+                headStyles: { 
+                    fillColor: [30, 41, 59], // Slate-800
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3,
+                    textColor: [51, 65, 85] // Slate-700
+                },
+                columnStyles: {
+                    0: { cellWidth: 30, halign: 'center' }, // Data
+                    1: { cellWidth: 'auto' }, // Descrição
+                    2: { cellWidth: 40, halign: 'right', fontStyle: 'bold', textColor: [22, 163, 74] } // Valor (Verde)
+                },
+                foot: [['', 'TOTAL PAGO', formatCurrency(totalPaid)]],
+                footStyles: {
+                    fillColor: [241, 245, 249], // Slate-100
+                    textColor: [30, 41, 59],
+                    fontStyle: 'bold',
+                    halign: 'right'
+                }
+            });
+            
+            // Rodapé
+            const pageCount = doc.internal.getNumberOfPages();
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184); // Slate-400
+            for(var i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.text('Gerenciamento de Obras - Documento não fiscal', 14, doc.internal.pageSize.height - 10);
+                doc.text('Página ' + String(i) + ' de ' + String(pageCount), doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+            }
+
+            // Salvar
+            doc.save(`Demonstrativo_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
         }
 
         function render() {
