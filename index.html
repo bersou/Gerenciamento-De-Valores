@@ -4,17 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- Título Principal -->
     <title>Gerenciamento</title>
     <meta name="description" content="Controle financeiro de empreitada e pagamentos semanais.">
 
-    <!-- Configurações Link Preview -->
-    <meta property="og:title" content="Gerenciamento de Pagamentos">
-    <meta property="og:description" content="Controle financeiro de obra. Valor total, pagos e saldo restante.">
-    <meta property="og:image" content="https://iili.io/fyYM2Lu.jpg">
+    <!-- CONFIGURAÇÃO DO LINK PREVIEW (WHATSAPP/FACEBOOK) -->
+    <meta property="og:title" content="Gerenciamento de Obras">
+    <meta property="og:description" content="Relatório de pagamentos, controle de saldo e gestão de empreitada.">
+    <!-- Nova Imagem Temática de Construção (Alta Definição) -->
+    <meta property="og:image" content="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=1200&auto=format&fit=crop">
     <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
 
     <!-- Configurações PWA -->
     <meta name="theme-color" content="#f1f5f9">
@@ -30,15 +33,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- ExcelJS e FileSaver (Para Excel) -->
+    <!-- ExcelJS e FileSaver -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
-    <!-- Chart.js (Para Gráficos) -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-    <!-- jsPDF e AutoTable (Para PDF Profissional) -->
+    <!-- jsPDF e AutoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
@@ -49,7 +52,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         input { font-size: 16px !important; }
         .touch-target { min-height: 48px; }
-        
         /* Modal Animation */
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; opacity: 0; visibility: hidden; }
         .modal.active { opacity: 1; visibility: visible; }
@@ -143,7 +145,7 @@
                 <div id="mainProgressBar" class="progress-bar bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-sm" style="width: 0%"></div>
             </div>
         </div>
-        
+
         <!-- Form -->
         <div class="bg-white p-5 rounded-2xl shadow-md border-t-4 border-blue-600 relative transition-all duration-300" id="formContainer">
             <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2" id="formTitle">
@@ -179,10 +181,10 @@
                 </h2>
                 
                 <div class="flex gap-2">
-                    <button onclick="exportToPDF()" class="text-xs font-bold bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition flex items-center gap-2 active:scale-95 border border-red-200">
+                    <button onclick="exportToPDF()" class="text-xs font-bold bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition flex items-center gap-2 active:scale-95 border border-red-200 shadow-sm">
                         <i data-lucide="file-text" size="16"></i> PDF
                     </button>
-                    <button onclick="exportToExcel()" class="text-xs font-bold bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition flex items-center gap-2 active:scale-95 border border-green-200">
+                    <button onclick="exportToExcel()" class="text-xs font-bold bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition flex items-center gap-2 active:scale-95 border border-green-200 shadow-sm">
                         <i data-lucide="file-spreadsheet" size="16"></i> Excel
                     </button>
                 </div>
@@ -324,7 +326,7 @@
                 saveData();
             }
         }
-        
+
         const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
         async function generateChartImage(totalPaid, remaining) {
@@ -348,7 +350,7 @@
                 });
             });
         }
-
+        
         async function exportToExcel() {
             if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
@@ -381,102 +383,121 @@
             saveAs(blob, `Controle_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
         }
 
-        // --- NOVA FUNÇÃO DE EXPORTAR PDF ---
+        // --- NOVA FUNÇÃO DE EXPORTAR PDF ESTILO NOTA FISCAL (PROFISSIONAL) ---
         async function exportToPDF() {
             if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Título e Dados do Cabeçalho
+            // --- CABEÇALHO ESTILO NOTA ---
+            // Fundo do cabeçalho
+            doc.setFillColor(30, 41, 59); // Slate-800
+            doc.rect(0, 0, 210, 40, 'F');
+            
+            // Título Principal
             doc.setFontSize(22);
-            doc.setTextColor(30, 41, 59); // Slate-800
-            doc.text("Demonstrativo de Pagamentos", 14, 20);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(255, 255, 255); // Branco
+            doc.text("DEMONSTRATIVO FINANCEIRO", 105, 18, { align: 'center' });
             
-            doc.setFontSize(10);
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(203, 213, 225); // Slate-300
+            doc.text("Controle de Empreitada", 105, 26, { align: 'center' });
+
+            // --- INFO DO DOCUMENTO ---
+            const dataEmissao = new Date().toLocaleDateString('pt-BR');
+            const horaEmissao = new Date().toLocaleTimeString('pt-BR');
+            
+            doc.setFontSize(9);
             doc.setTextColor(100, 116, 139); // Slate-500
-            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 14, 28);
-            
-            // Caixa de Resumo
+            doc.text(`Emitido em: ${dataEmissao} às ${horaEmissao}`, 14, 48);
+
+            // --- CAIXAS DE RESUMO (ESTILO CARD) ---
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
             const remaining = state.totalGoal - totalPaid;
             
-            doc.setDrawColor(203, 213, 225); // Slate-300
-            doc.setFillColor(248, 250, 252); // Slate-50
-            doc.roundedRect(14, 35, 180, 25, 3, 3, 'FD');
-            
-            doc.setFontSize(10);
-            doc.setTextColor(71, 85, 105); // Slate-600
-            doc.text("VALOR EMPREITADA", 20, 42);
-            doc.text("TOTAL PAGO", 85, 42);
-            doc.text("SALDO RESTANTE", 150, 42);
-            
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(30, 41, 59); // Slate-800
-            doc.text(formatCurrency(state.totalGoal), 20, 50);
-            
-            doc.setTextColor(22, 163, 74); // Green-600
-            doc.text(formatCurrency(totalPaid), 85, 50);
-            
-            doc.setTextColor(220, 38, 38); // Red-600
-            doc.text(formatCurrency(remaining), 150, 50);
-            
-            // Tabela de Dados
-            const tableColumn = ["Data", "Descrição", "Valor Pago"];
+            // Desenhar Caixas
+            const boxY = 55;
+            const boxHeight = 25;
+            const boxWidth = 60;
+            const gap = 4;
+            const startX = 13;
+
+            // Função auxiliar para desenhar caixa
+            function drawStatBox(x, label, value, color) {
+                doc.setDrawColor(226, 232, 240); // Borda suave
+                doc.setFillColor(255, 255, 255); // Fundo branco
+                doc.roundedRect(x, boxY, boxWidth, boxHeight, 2, 2, 'FD');
+                
+                doc.setFontSize(8);
+                doc.setTextColor(100, 116, 139); // Label cor
+                doc.text(label, x + (boxWidth/2), boxY + 8, { align: 'center' });
+                
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(color[0], color[1], color[2]);
+                doc.text(value, x + (boxWidth/2), boxY + 18, { align: 'center' });
+            }
+
+            drawStatBox(startX, "VALOR TOTAL", formatCurrency(state.totalGoal), [30, 41, 59]); // Dark
+            drawStatBox(startX + boxWidth + gap, "TOTAL PAGO", formatCurrency(totalPaid), [22, 163, 74]); // Verde
+            drawStatBox(startX + (boxWidth + gap)*2, "SALDO RESTANTE", formatCurrency(remaining), [220, 38, 38]); // Vermelho
+
+            // --- TABELA DE ITENS ---
+            const tableColumn = ["DATA", "DESCRIÇÃO / SERVIÇO", "VALOR"];
             const tableRows = [];
 
             state.payments.forEach(payment => {
                 const paymentData = [
                     payment.date,
-                    payment.description,
+                    payment.description.toUpperCase(),
                     formatCurrency(payment.amount)
                 ];
                 tableRows.push(paymentData);
             });
 
-            // Gerar Tabela com AutoTable
+            // Configuração da Tabela
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
-                startY: 65,
-                theme: 'striped',
-                headStyles: { 
-                    fillColor: [30, 41, 59], // Slate-800
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold'
-                },
+                startY: boxY + boxHeight + 15,
+                theme: 'grid', // Estilo grade para parecer nota fiscal
                 styles: {
-                    fontSize: 10,
-                    cellPadding: 3,
-                    textColor: [51, 65, 85] // Slate-700
+                    fontSize: 9,
+                    cellPadding: 4,
+                    textColor: [51, 65, 85], // Slate-700
+                    lineColor: [226, 232, 240], // Linhas suaves
+                    lineWidth: 0.1
+                },
+                headStyles: { 
+                    fillColor: [71, 85, 105], // Slate-600
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center'
                 },
                 columnStyles: {
-                    0: { cellWidth: 30, halign: 'center' }, // Data
+                    0: { cellWidth: 35, halign: 'center' }, // Data
                     1: { cellWidth: 'auto' }, // Descrição
-                    2: { cellWidth: 40, halign: 'right', fontStyle: 'bold', textColor: [22, 163, 74] } // Valor (Verde)
+                    2: { cellWidth: 45, halign: 'right', fontStyle: 'bold' } // Valor
                 },
-                foot: [['', 'TOTAL PAGO', formatCurrency(totalPaid)]],
+                foot: [['', 'TOTAL ACUMULADO', formatCurrency(totalPaid)]],
                 footStyles: {
                     fillColor: [241, 245, 249], // Slate-100
                     textColor: [30, 41, 59],
                     fontStyle: 'bold',
-                    halign: 'right'
+                    halign: 'right',
+                    fontSize: 10
+                },
+                // Remover rodapé padrão
+                didDrawPage: function (data) {
+                    // Sem rodapé
                 }
             });
             
-            // Rodapé
-            const pageCount = doc.internal.getNumberOfPages();
-            doc.setFontSize(8);
-            doc.setTextColor(148, 163, 184); // Slate-400
-            for(var i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.text('Gerenciamento de Obras - Documento não fiscal', 14, doc.internal.pageSize.height - 10);
-                doc.text('Página ' + String(i) + ' de ' + String(pageCount), doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
-            }
-
             // Salvar
-            doc.save(`Demonstrativo_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
+            doc.save(`Relatorio_Obras_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
         }
 
         function render() {
