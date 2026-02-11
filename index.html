@@ -11,7 +11,7 @@
     <!-- CONFIGURAÇÃO DO LINK PREVIEW (WHATSAPP/FACEBOOK) -->
     <meta property="og:title" content="Gerenciamento de Obras">
     <meta property="og:description" content="Relatório de pagamentos, controle de saldo e gestão de empreitada.">
-    <!-- Nova Imagem Temática de Construção (Alta Definição) -->
+    <!-- Imagem Temática de Construção (Alta Qualidade) -->
     <meta property="og:image" content="https://images.unsplash.com/photo-1543286386-2e659306cd6c?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGdlcmVuY2lhbWVudG98ZW58MHx8MHx8fDA%3D">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
@@ -196,7 +196,7 @@
             <div id="paymentsList" class="divide-y divide-slate-100 hidden max-h-[500px] overflow-y-auto"></div>
         </div>
     </div>
-
+    
     <script>
         // --- PWA Setup ---
         let deferredPrompt;
@@ -350,7 +350,7 @@
                 });
             });
         }
-        
+
         async function exportToExcel() {
             if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
@@ -383,121 +383,107 @@
             saveAs(blob, `Controle_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
         }
 
-        // --- NOVA FUNÇÃO DE EXPORTAR PDF ESTILO NOTA FISCAL (PROFISSIONAL) ---
+        // --- FUNÇÃO DE EXPORTAR PDF ESTILO NOTA (Comprovante) ---
         async function exportToPDF() {
             if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // --- CABEÇALHO ESTILO NOTA ---
-            // Fundo do cabeçalho
+            // --- CABEÇALHO ---
             doc.setFillColor(30, 41, 59); // Slate-800
-            doc.rect(0, 0, 210, 40, 'F');
+            doc.rect(0, 0, 210, 30, 'F'); // Reduzi altura
             
-            // Título Principal
-            doc.setFontSize(22);
+            doc.setFontSize(18);
             doc.setFont("helvetica", "bold");
-            doc.setTextColor(255, 255, 255); // Branco
-            doc.text("DEMONSTRATIVO FINANCEIRO", 105, 18, { align: 'center' });
-            
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(203, 213, 225); // Slate-300
-            doc.text("Controle de Empreitada", 105, 26, { align: 'center' });
+            doc.setTextColor(255, 255, 255);
+            doc.text("Comprovante de Pagamentos", 105, 18, { align: 'center' }); // Texto Simples
 
-            // --- INFO DO DOCUMENTO ---
+            // --- INFO DATA (Abaixo do cabeçalho) ---
             const dataEmissao = new Date().toLocaleDateString('pt-BR');
             const horaEmissao = new Date().toLocaleTimeString('pt-BR');
-            
-            doc.setFontSize(9);
-            doc.setTextColor(100, 116, 139); // Slate-500
-            doc.text(`Emitido em: ${dataEmissao} às ${horaEmissao}`, 14, 48);
-
-            // --- CAIXAS DE RESUMO (ESTILO CARD) ---
+            doc.setFontSize(10);
+            doc.setTextColor(71, 85, 105);
+            doc.text(`Emitido em: ${dataEmissao} às ${horaEmissao}`, 14, 40);
+        
+            // --- CAIXAS DE RESUMO (Ajustadas) ---
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
             const remaining = state.totalGoal - totalPaid;
             
-            // Desenhar Caixas
-            const boxY = 55;
-            const boxHeight = 25;
-            const boxWidth = 60;
-            const gap = 4;
-            const startX = 13;
+            const boxY = 48;
+            const boxHeight = 22;
+            const boxWidth = 58;
+            const gap = 6;
+            const startX = 14;
 
-            // Função auxiliar para desenhar caixa
-            function drawStatBox(x, label, value, color) {
-                doc.setDrawColor(226, 232, 240); // Borda suave
-                doc.setFillColor(255, 255, 255); // Fundo branco
+            function drawStatBox(x, label, value, bgColor, txtColor) {
+                doc.setDrawColor(200, 200, 200);
+                doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
                 doc.roundedRect(x, boxY, boxWidth, boxHeight, 2, 2, 'FD');
                 
-                doc.setFontSize(8);
-                doc.setTextColor(100, 116, 139); // Label cor
-                doc.text(label, x + (boxWidth/2), boxY + 8, { align: 'center' });
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text(label, x + (boxWidth/2), boxY + 7, { align: 'center' });
                 
-                doc.setFontSize(11);
+                doc.setFontSize(12); // Fonte maior
                 doc.setFont("helvetica", "bold");
-                doc.setTextColor(color[0], color[1], color[2]);
-                doc.text(value, x + (boxWidth/2), boxY + 18, { align: 'center' });
+                doc.setTextColor(txtColor[0], txtColor[1], txtColor[2]);
+                doc.text(value, x + (boxWidth/2), boxY + 16, { align: 'center' });
             }
 
-            drawStatBox(startX, "VALOR TOTAL", formatCurrency(state.totalGoal), [30, 41, 59]); // Dark
-            drawStatBox(startX + boxWidth + gap, "TOTAL PAGO", formatCurrency(totalPaid), [22, 163, 74]); // Verde
-            drawStatBox(startX + (boxWidth + gap)*2, "SALDO RESTANTE", formatCurrency(remaining), [220, 38, 38]); // Vermelho
+            drawStatBox(startX, "VALOR TOTAL", formatCurrency(state.totalGoal), [255, 255, 255], [30, 41, 59]);
+            drawStatBox(startX + boxWidth + gap, "JÁ PAGO", formatCurrency(totalPaid), [240, 253, 244], [22, 163, 74]);
+            drawStatBox(startX + (boxWidth + gap)*2, "SALDO A PAGAR", formatCurrency(remaining), [254, 242, 242], [220, 38, 38]);
 
-            // --- TABELA DE ITENS ---
-            const tableColumn = ["DATA", "DESCRIÇÃO / SERVIÇO", "VALOR"];
+            // --- TABELA ---
+            const tableColumn = ["DATA", "DESCRIÇÃO", "VALOR"];
             const tableRows = [];
 
             state.payments.forEach(payment => {
-                const paymentData = [
+                tableRows.push([
                     payment.date,
                     payment.description.toUpperCase(),
                     formatCurrency(payment.amount)
-                ];
-                tableRows.push(paymentData);
+                ]);
             });
 
-            // Configuração da Tabela
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
                 startY: boxY + boxHeight + 15,
-                theme: 'grid', // Estilo grade para parecer nota fiscal
+                theme: 'striped', // Mantido zebrado
                 styles: {
-                    fontSize: 9,
-                    cellPadding: 4,
-                    textColor: [51, 65, 85], // Slate-700
-                    lineColor: [226, 232, 240], // Linhas suaves
-                    lineWidth: 0.1
+                    fontSize: 12, // Fonte maior (Mobile First)
+                    cellPadding: 6, // Mais espaço
+                    textColor: [51, 65, 85],
+                    lineWidth: 0.1,
+                    lineColor: [203, 213, 225]
                 },
                 headStyles: { 
-                    fillColor: [71, 85, 105], // Slate-600
+                    fillColor: [51, 65, 85], 
                     textColor: [255, 255, 255],
                     fontStyle: 'bold',
-                    halign: 'center'
+                    halign: 'center',
+                    fontSize: 12
                 },
                 columnStyles: {
-                    0: { cellWidth: 35, halign: 'center' }, // Data
-                    1: { cellWidth: 'auto' }, // Descrição
-                    2: { cellWidth: 45, halign: 'right', fontStyle: 'bold' } // Valor
+                    0: { cellWidth: 40, halign: 'center' },
+                    1: { cellWidth: 'auto' },
+                    2: { cellWidth: 50, halign: 'right', fontStyle: 'bold' }
                 },
-                foot: [['', 'TOTAL ACUMULADO', formatCurrency(totalPaid)]],
+                foot: [['', 'TOTAL GERAL', formatCurrency(totalPaid)]],
                 footStyles: {
-                    fillColor: [241, 245, 249], // Slate-100
+                    fillColor: [241, 245, 249],
                     textColor: [30, 41, 59],
                     fontStyle: 'bold',
                     halign: 'right',
-                    fontSize: 10
+                    fontSize: 14 // Total bem grande
                 },
-                // Remover rodapé padrão
-                didDrawPage: function (data) {
-                    // Sem rodapé
-                }
+                // Sem rodapé
+                didDrawPage: function (data) {}
             });
             
-            // Salvar
-            doc.save(`Relatorio_Obras_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
+            doc.save(`Comprovante_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
         }
 
         function render() {
