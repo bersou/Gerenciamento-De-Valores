@@ -9,22 +9,21 @@
     <meta name="description" content="Controle financeiro de empreitada e pagamentos semanais.">
 
     <!-- CONFIGURAÇÃO DO LINK PREVIEW (WHATSAPP/FACEBOOK) -->
-    <meta property="og:title" content="Gerenciamento de Obras">
-    <meta property="og:description" content="Relatório de pagamentos, controle de saldo e gestão de empreitada.">
-    <!-- Imagem de Preview Vetorial -->
-    <meta property="og:image" content="https://plus.unsplash.com/premium_vector-1682305492040-a272f5d4d3db?q=80&w=1316&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
+    <meta property="og:title" content="Gerenciamento de Pagamentos">
+    <meta property="og:description" content="Controle financeiro de obra. Valor total, pagos e saldo restante.">
+    <!-- Imagem de Preview Corrigida (Usando o Logo Oficial) -->
+    <meta property="og:image" content="https://iili.io/q91MH3x.jpg">
     <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
     <meta property="og:type" content="website">
-    <meta property="og:locale" content="pt_BR">
 
     <!-- Configurações PWA -->
     <meta name="theme-color" content="#ffffff">
     <link rel="manifest" href="./manifest.json">
-    <!-- Ícone da Aplicação -->
-    <link rel="icon" href="https://iili.io/q9lOJe4.jpg">
-    <link rel="apple-touch-icon" href="https://iili.io/q9lOJe4.jpg">
+    <!-- Links de Ícones Corrigidos -->
+    <link rel="icon" href="https://iili.io/q91MH3x.jpg">
+    <link rel="apple-touch-icon" href="https://iili.io/q91MH3x.jpg">
     <meta name="apple-mobile-web-app-title" content="Gerenciamento">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -88,7 +87,8 @@
         <!-- Logo animada -->
         <div class="relative animate-pulse-slow">
             <div class="absolute -inset-4 bg-blue-100 rounded-full blur-xl opacity-70 animate-pulse"></div>
-            <img src="https://iili.io/q9lOJe4.jpg" alt="Logo" class="w-32 h-32 object-contain relative z-10 mix-blend-multiply">
+            <!-- Link da Imagem Corrigido -->
+            <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-32 h-32 object-contain relative z-10 mix-blend-multiply">
         </div>
         
         <!-- Título -->
@@ -102,7 +102,7 @@
         </div>
     </div>
 
-    <!-- Canvas Oculto -->
+    <!-- Canvas Oculto para Gráfico Excel -->
     <canvas id="excelChartCanvas" width="600" height="600" style="display:none;"></canvas>
 
     <!-- MODAL DE EDIÇÃO DE META -->
@@ -130,9 +130,10 @@
 
     <div class="max-w-xl mx-auto min-h-screen flex flex-col p-4 md:p-6 space-y-5 fade-in">
         
-        <!-- Cabeçalho Limpo e Otimizado -->
+        <!-- Cabeçalho Principal do App -->
         <div class="text-center py-6 relative">
-            <img src="https://iili.io/q9lOJe4.jpg" alt="Logo" class="w-32 h-32 mx-auto mb-3 object-contain mix-blend-multiply">
+            <!-- Link da Imagem Corrigido -->
+            <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-32 h-32 mx-auto mb-8 object-contain mix-blend-multiply">
             
             <!-- Título com o efeito text-gradient-shine -->
             <h1 class="text-2xl md:text-3xl font-extrabold leading-tight text-gradient-shine tracking-tight px-2">
@@ -213,7 +214,7 @@
                 </div>
             </form>
         </div>
-
+        
         <!-- Histórico -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-grow">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl flex-wrap gap-2">
@@ -244,8 +245,8 @@
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
                 splash.classList.add('splash-hidden');
-                setTimeout(() => splash.remove(), 700); // Remove do código após sumir
-            }, 1800); // Tempo que a tela inicial fica visível (1.8s)
+                setTimeout(() => splash.remove(), 700);
+            }, 1800); 
         });
 
         // --- PWA Setup ---
@@ -281,7 +282,7 @@
             localStorage.setItem('artemioApp_goal', state.totalGoal.toString());
             render();
         }
-        
+
         // --- MODAL LÓGICA ---
         function openGoalModal() {
             document.getElementById('goalInput').value = state.totalGoal > 0 ? state.totalGoal : '';
@@ -358,7 +359,7 @@
 
         function cancelEdit() {
             editingId = null;
-            document.getElementById('amountInput').value = ''; document.getElementById('descInput').value = '';
+             document.getElementById('amountInput').value = ''; document.getElementById('descInput').value = '';
             const formContainer = document.getElementById('formContainer');
             formContainer.classList.add('border-blue-600'); formContainer.classList.remove('border-amber-500', 'ring-2', 'ring-amber-100');
             document.getElementById('formTitle').innerHTML = '<span class="bg-blue-50 text-blue-600 rounded-lg p-1.5 border border-blue-100"><i data-lucide="plus" size="18"></i></span> Registrar Pagamento';
@@ -433,7 +434,7 @@
             saveAs(blob, `Controle_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
         }
 
-        // --- FUNÇÃO DE EXPORTAR PDF ESTILO NOTA (Comprovante) ---
+        // --- FUNÇÃO DE EXPORTAR PDF ---
         async function exportToPDF() {
             if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
             
@@ -447,16 +448,16 @@
             doc.setFontSize(18);
             doc.setFont("helvetica", "bold");
             doc.setTextColor(255, 255, 255);
-            doc.text("Comprovante de Pagamentos", 105, 18, { align: 'center' }); 
-
-            // --- INFO DATA (Abaixo do cabeçalho) ---
+            doc.text("Comprovante de Pagamentos", 105, 18, { align: 'center' });
+            
+            // --- INFO DATA ---
             const dataEmissao = new Date().toLocaleDateString('pt-BR');
             const horaEmissao = new Date().toLocaleTimeString('pt-BR');
             doc.setFontSize(10);
             doc.setTextColor(71, 85, 105);
             doc.text(`Emitido em: ${dataEmissao} às ${horaEmissao}`, 14, 40);
 
-            // --- CAIXAS DE RESUMO (Ajustadas) ---
+            // --- CAIXAS DE RESUMO ---
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
             const remaining = state.totalGoal - totalPaid;
             
@@ -559,14 +560,14 @@
                     const isEditing = editingId === payment.id;
                     const bgClass = isEditing ? "bg-amber-50 border-l-4 border-amber-400" : "";
                     item.innerHTML = `
-                        <div class="flex items-center gap-3 ${bgClass} rounded-lg p-2 transition-colors">
-                            <div class="flex flex-col items-center justify-center bg-slate-50 text-slate-600 px-2 py-1.5 rounded-lg border border-slate-200 min-w-[60px] shadow-sm"><span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">DATA</span><span class="text-xs font-bold">${payment.date.substring(0, 5)}</span></div>
-                            <div class="overflow-hidden"><p class="font-bold text-slate-800 text-sm truncate pr-2">${payment.description}</p><p class="text-[10px] text-slate-400 truncate">Em ${payment.date}</p></div>
+                        <div class=\"flex items-center gap-3 ${bgClass} rounded-lg p-2 transition-colors\">
+                            <div class=\"flex flex-col items-center justify-center bg-slate-50 text-slate-600 px-2 py-1.5 rounded-lg border border-slate-200 min-w-[60px] shadow-sm\"><span class=\"text-[9px] font-bold uppercase tracking-wider text-slate-400\">DATA</span><span class=\"text-xs font-bold\">${payment.date.substring(0, 5)}</span></div>
+                            <div class=\"overflow-hidden\"><p class=\"font-bold text-slate-800 text-sm truncate pr-2\">${payment.description}</p><p class=\"text-[10px] text-slate-400 truncate\">Em ${payment.date}</p></div>
                         </div>
-                        <div class="flex items-center gap-2 pl-2">
-                            <span class="font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1">- ${formatCurrency(payment.amount)}</span>
-                            <button onclick="startEdit(${payment.id})" class="text-slate-300 hover:text-amber-500 p-2 rounded-full hover:bg-amber-50 transition active:scale-90" title="Editar"><i data-lucide="pencil" size="16"></i></button>
-                            <button onclick="deletePayment(${payment.id})" class="text-slate-300 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition active:scale-90" title="Excluir"><i data-lucide="trash-2" size="16"></i></button>
+                        <div class=\"flex items-center gap-2 pl-2\">
+                            <span class=\"font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1\">- ${formatCurrency(payment.amount)}</span>
+                            <button onclick=\"startEdit(${payment.id})\" class=\"text-slate-300 hover:text-amber-500 p-2 rounded-full hover:bg-amber-50 transition active:scale-90\" title=\"Editar\"><i data-lucide=\"pencil\" size=\"16\"></i></button>
+                            <button onclick=\"deletePayment(${payment.id})\" class=\"text-slate-300 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition active:scale-90\" title=\"Excluir\"><i data-lucide=\"trash-2\" size=\"16\"></i></button>
                         </div>
                     `;
                     listEl.appendChild(item);
@@ -577,3 +578,5 @@
     </script>
 </body>
 </html>
+
+            
