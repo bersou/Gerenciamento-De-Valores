@@ -3,18 +3,18 @@
   "short_name": "Gerenciamento",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f1f5f9",
-  "theme_color": "#f1f5f9",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "https://iili.io/fyYM2Lu.jpg",
+      "src": "https://iili.io/q9lOJe4.jpg",
       "sizes": "192x192",
       "type": "image/jpeg",
       "purpose": "any maskable"
     },
     {
-      "src": "https://iili.io/fyYM2Lu.jpg",
+      "src": "https://iili.io/q9lOJe4.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "any maskable"
