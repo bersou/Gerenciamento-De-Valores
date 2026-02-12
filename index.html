@@ -11,17 +11,17 @@
     <!-- CONFIGURAÇÃO DO LINK PREVIEW (WHATSAPP/FACEBOOK) -->
     <meta property="og:title" content="Gerenciamento de Pagamentos">
     <meta property="og:description" content="Controle financeiro de obra. Valor total, pagos e saldo restante.">
-    <!-- Imagem de Preview Corrigida (Usando o Logo Oficial) -->
-    <meta property="og:image" content="https://iili.io/q91MH3x.jpg">
+    <!-- Nova Imagem de Preview que você enviou -->
+    <meta property="og:image" content="https://plus.unsplash.com/premium_vector-1682305492040-a272f5d4d3db?q=80&w=1316&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
     <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:type" content="website">
 
     <!-- Configurações PWA -->
     <meta name="theme-color" content="#ffffff">
     <link rel="manifest" href="./manifest.json">
-    <!-- Links de Ícones Corrigidos -->
+    <!-- Ícones da Aplicação (Logo correto) -->
     <link rel="icon" href="https://iili.io/q91MH3x.jpg">
     <link rel="apple-touch-icon" href="https://iili.io/q91MH3x.jpg">
     <meta name="apple-mobile-web-app-title" content="Gerenciamento">
@@ -87,7 +87,7 @@
         <!-- Logo animada -->
         <div class="relative animate-pulse-slow">
             <div class="absolute -inset-4 bg-blue-100 rounded-full blur-xl opacity-70 animate-pulse"></div>
-            <!-- Link da Imagem Corrigido -->
+            <!-- Imagem do Logo na Intro -->
             <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-32 h-32 object-contain relative z-10 mix-blend-multiply">
         </div>
         
@@ -132,7 +132,7 @@
         
         <!-- Cabeçalho Principal do App -->
         <div class="text-center py-6 relative">
-            <!-- Link da Imagem Corrigido -->
+            <!-- Imagem do Logo com espaçamento (margin-bottom) aumentado para 'mb-8' -->
             <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-32 h-32 mx-auto mb-8 object-contain mix-blend-multiply">
             
             <!-- Título com o efeito text-gradient-shine -->
@@ -202,7 +202,7 @@
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Valor (R$)</label>
                         <input type="number" id="amountInput" inputmode="decimal" step="0.01" placeholder="0,00" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition font-mono font-bold text-lg text-slate-800 touch-target">
-                    </div>
+                        </div>
                 </div>
                 <div class="flex gap-3">
                     <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="hidden w-1/3 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 border border-slate-200 flex justify-center items-center gap-2 transition active:scale-[0.98]">
@@ -214,7 +214,7 @@
                 </div>
             </form>
         </div>
-        
+
         <!-- Histórico -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-grow">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl flex-wrap gap-2">
@@ -359,7 +359,7 @@
 
         function cancelEdit() {
             editingId = null;
-             document.getElementById('amountInput').value = ''; document.getElementById('descInput').value = '';
+            document.getElementById('amountInput').value = ''; document.getElementById('descInput').value = '';
             const formContainer = document.getElementById('formContainer');
             formContainer.classList.add('border-blue-600'); formContainer.classList.remove('border-amber-500', 'ring-2', 'ring-amber-100');
             document.getElementById('formTitle').innerHTML = '<span class="bg-blue-50 text-blue-600 rounded-lg p-1.5 border border-blue-100"><i data-lucide="plus" size="18"></i></span> Registrar Pagamento';
@@ -434,7 +434,7 @@
             saveAs(blob, `Controle_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
         }
 
-        // --- FUNÇÃO DE EXPORTAR PDF ---
+        // --- FUNÇÃO DE EXPORTAR PDF ESTILO NOTA (Comprovante) ---
         async function exportToPDF() {
             if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
             
@@ -448,16 +448,16 @@
             doc.setFontSize(18);
             doc.setFont("helvetica", "bold");
             doc.setTextColor(255, 255, 255);
-            doc.text("Comprovante de Pagamentos", 105, 18, { align: 'center' });
-            
-            // --- INFO DATA ---
+            doc.text("Comprovante de Pagamentos", 105, 18, { align: 'center' }); 
+
+            // --- INFO DATA (Abaixo do cabeçalho) ---
             const dataEmissao = new Date().toLocaleDateString('pt-BR');
             const horaEmissao = new Date().toLocaleTimeString('pt-BR');
             doc.setFontSize(10);
             doc.setTextColor(71, 85, 105);
             doc.text(`Emitido em: ${dataEmissao} às ${horaEmissao}`, 14, 40);
 
-            // --- CAIXAS DE RESUMO ---
+            // --- CAIXAS DE RESUMO (Ajustadas) ---
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
             const remaining = state.totalGoal - totalPaid;
             
@@ -560,14 +560,14 @@
                     const isEditing = editingId === payment.id;
                     const bgClass = isEditing ? "bg-amber-50 border-l-4 border-amber-400" : "";
                     item.innerHTML = `
-                        <div class=\"flex items-center gap-3 ${bgClass} rounded-lg p-2 transition-colors\">
-                            <div class=\"flex flex-col items-center justify-center bg-slate-50 text-slate-600 px-2 py-1.5 rounded-lg border border-slate-200 min-w-[60px] shadow-sm\"><span class=\"text-[9px] font-bold uppercase tracking-wider text-slate-400\">DATA</span><span class=\"text-xs font-bold\">${payment.date.substring(0, 5)}</span></div>
-                            <div class=\"overflow-hidden\"><p class=\"font-bold text-slate-800 text-sm truncate pr-2\">${payment.description}</p><p class=\"text-[10px] text-slate-400 truncate\">Em ${payment.date}</p></div>
+                        <div class="flex items-center gap-3 ${bgClass} rounded-lg p-2 transition-colors">
+                            <div class="flex flex-col items-center justify-center bg-slate-50 text-slate-600 px-2 py-1.5 rounded-lg border border-slate-200 min-w-[60px] shadow-sm"><span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">DATA</span><span class="text-xs font-bold">${payment.date.substring(0, 5)}</span></div>
+                            <div class="overflow-hidden"><p class="font-bold text-slate-800 text-sm truncate pr-2">${payment.description}</p><p class="text-[10px] text-slate-400 truncate">Em ${payment.date}</p></div>
                         </div>
-                        <div class=\"flex items-center gap-2 pl-2\">
-                            <span class=\"font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1\">- ${formatCurrency(payment.amount)}</span>
-                            <button onclick=\"startEdit(${payment.id})\" class=\"text-slate-300 hover:text-amber-500 p-2 rounded-full hover:bg-amber-50 transition active:scale-90\" title=\"Editar\"><i data-lucide=\"pencil\" size=\"16\"></i></button>
-                            <button onclick=\"deletePayment(${payment.id})\" class=\"text-slate-300 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition active:scale-90\" title=\"Excluir\"><i data-lucide=\"trash-2\" size=\"16\"></i></button>
+                        <div class="flex items-center gap-2 pl-2">
+                            <span class="font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1">- ${formatCurrency(payment.amount)}</span>
+                            <button onclick="startEdit(${payment.id})" class="text-slate-300 hover:text-amber-500 p-2 rounded-full hover:bg-amber-50 transition active:scale-90" title="Editar"><i data-lucide="pencil" size="16"></i></button>
+                            <button onclick="deletePayment(${payment.id})" class="text-slate-300 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition active:scale-90" title="Excluir"><i data-lucide="trash-2" size="16"></i></button>
                         </div>
                     `;
                     listEl.appendChild(item);
@@ -578,5 +578,3 @@
     </script>
 </body>
 </html>
-
-            
