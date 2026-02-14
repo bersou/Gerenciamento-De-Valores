@@ -9,8 +9,15 @@ Aplicação web desenvolvida para controle financeiro de obras e empreitadas, fo
 
 ## 📸 Screenshots
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/59694fc6-0085-4750-9a63-4abd096193ef" alt="Tela Principal" width="250"/>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/59694fc6-0085-4750-9a63-4abd096193ef" width="24%" style="max-width:300px;"/>
+  <img src="https://github.com/user-attachments/assets/b67e9b2d-b08d-4da5-a773-cecdfd6b4e55" width="24%" style="max-width:300px;"/>
+  <img src="https://github.com/user-attachments/assets/9f3fb6e3-33ea-434b-9edb-0006b35b11e7" width="24%" style="max-width:300px;"/>
+  <img src="https://github.com/user-attachments/assets/82354f34-e0f0-4288-8ddd-1c5d00ae6adc" width="24%" style="max-width:300px;"/>
+</p>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/02ef8d05-3ea8-4dfd-a65f-3bfde74b9b48" width="49%" style="max-width:600px;"/>
+</p>
     <img src="<img width="1095" height="530" alt="Gerenciador (3)" src="https://github.com/user-attachments/assets/b67e9b2d-b08d-4da5-a773-cecdfd6b4e55" />
 " alt="Gráfico de Status" width="250"/>
   <img src="https://github.com/user-attachments/assets/9f3fb6e3-33ea-434b-9edb-0006b35b11e7" alt="Gerenciamento Completo" width="250"/>
