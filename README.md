@@ -12,10 +12,10 @@ Utiliza bibliotecas **jsPDF** para geração de comprovantes PDF e **ExcelJS** p
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/59694fc6-0085-4750-9a63-4abd096193ef" width="24%" style="max-width:300px;"/>
-  <img src="https://github.com/user-attachments/assets/b67e9b2d-b08d-4da5-a773-cecdfd6b4e55" width="24%" style="max-width:300px;"/>
-  <img src="https://github.com/user-attachments/assets/02ef8d05-3ea8-4dfd-a65f-3bfde74b9b48" width="24%" style="max-width:300px;"/>
-  <img src="https://github.com/user-attachments/assets/82354f34-e0f0-4288-8ddd-1c5d00ae6adc" width="24%" style="max-width:300px;"/>
+  <img src="https://github.com/user-attachments/assets/59694fc6-0085-4750-9a63-4abd096193ef" width="48%" style="max-width:500px;"/>
+  <img src="https://github.com/user-attachments/assets/b67e9b2d-b08d-4da5-a773-cecdfd6b4e55" width="48%" style="max-width:500px;"/>
+  <img src="https://github.com/user-attachments/assets/02ef8d05-3ea8-4dfd-a65f-3bfde74b9b48" width="48%" style="max-width:500px;"/>
+  <img src="https://github.com/user-attachments/assets/82354f34-e0f0-4288-8ddd-1c5d00ae6adc" width="48%" style="max-width:500px;"/>
 </p>
 
 ## 📱 Funcionalidades
