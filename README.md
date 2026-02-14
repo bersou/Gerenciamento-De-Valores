@@ -11,14 +11,12 @@ Aplicação web desenvolvida para controle financeiro de obras e empreitadas, fo
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/59694fc6-0085-4750-9a63-4abd096193ef" alt="Tela Principal" width="250"/>
+  <img src="https://github.com/user-attachments/assets/9f3fb6e3-33ea-434b-9edb-0006b35b11e7" alt="Gerenciamento Completo" width="250"/>
+  <img src="https://github.com/user-attachments/assets/82354f34-e0f0-4288-8ddd-1c5d00ae6adc" alt="Formulário de Registro" width="250"/>
+  <img src="https://github.com/user-attachments/assets/02ef8d05-3ea8-4dfd-a65f-3bfde74b9b48" alt="Comprovante PDF" width="250"/>
+  </div>
 
-  <img src="<img width="1005" height="591" alt="Gerenciador (4)" src="https://github.com/user-attachments/assets/9f3fb6e3-33ea-434b-9edb-0006b35b11e7" />
-" alt="Gerenciamento de pagamentos" width="250"/>
-  <img src="<img width="895" height="560" alt="Gerenciador (1)" src="https://github.com/user-attachments/assets/82354f34-e0f0-4288-8ddd-1c5d00ae6adc" />
-" alt="Formulário de registro" width="250"/>
-  <img src="<img width="1019" height="546" alt="Gerenciador (2)" src="https://github.com/user-attachments/assets/02ef8d05-3ea8-4dfd-a65f-3bfde74b9b48" />
-" alt="Comprovante PDF gerado" width="250"/>
-</div>
+
 
 ## 📱 Funcionalidades
 
