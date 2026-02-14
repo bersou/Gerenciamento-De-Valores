@@ -9,21 +9,18 @@ Aplicação web desenvolvida para controle financeiro de obras e empreitadas, fo
 
 ## 📸 Screenshots
 
-<div align="center">
-
-<img src="https://iili.io/fppvaiQ.png" alt="Tela Principal" width="250"/>
-<img src="https://iili.io/fppvYWx.png" alt="Histórico de Pagamentos" width="250"/>
-<img src="https://iili.io/fppv7xj.png" alt="Exportação Excel" width="250"/>
-<img src="https://iili.io/fpiTKyF.jpg" alt="Interface Mobile" width="250"/>
-
-</div>
+![Tela inicial com tabela de pagamentos]()
+![Gerenciamento de pagamentos com gráfico]()
+![Formulário de registro de pagamento]()
+![Comprovante de pagamentos gerado]()
 
 ## 📱 Funcionalidades
 
 - **Controle de Saldo**: Visualização clara do valor total combinado, valor já pago e saldo restante.
 - **Histórico Detalhado**: Lista de todos os pagamentos com data e descrição.
 - **Edição e Exclusão**: Possibilidade de corrigir lançamentos errados facilmente (valor ou texto).
-- **Exportação Excel**: Gera planilha detalhada (.xlsx) com gráfico de rosca integrado para análise visual, sem linhas de grade para impressão limpa.
+- **Exportação Excel**: Gera planilha detalhada (.xlsx) com gráfico de rosca integrado para análise visual, sem
+- - **Exportação PDF**: Gera comprovante profissional em PDF com todos os dados da empreitada e gráfico visual.linhas de grade para impressão limpa.
 - **Mobile First**: Interface otimizada para uso em celulares, com botões grandes e layout responsivo.
 - **Instalável (PWA)**: Pode ser adicionado à tela inicial do celular como um aplicativo nativo.
 
@@ -47,6 +44,7 @@ Este é um projeto Client-Side. Isso significa que:
 - HTML5 & CSS3 (TailwindCSS)
 - JavaScript (Vanilla)
 - ExcelJS (Para geração de planilhas profissionais)
+- - jsPDF (Para geração de PDF com comprovantes de pagamento)
 - Chart.js (Para gráficos visuais)
 - Lucide Icons (Ícones da interface)
 
