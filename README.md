@@ -9,18 +9,24 @@ Aplicação web desenvolvida para controle financeiro de obras e empreitadas, fo
 
 ## 📸 Screenshots
 
-![Tela inicial com tabela de pagamentos]()
-![Gerenciamento de pagamentos com gráfico]()
-![Formulário de registro de pagamento]()
-![Comprovante de pagamentos gerado]()
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/59694fc6-0085-4750-9a63-4abd096193ef" alt="Tela Principal" width="250"/>
+
+  <img src="<img width="1005" height="591" alt="Gerenciador (4)" src="https://github.com/user-attachments/assets/9f3fb6e3-33ea-434b-9edb-0006b35b11e7" />
+" alt="Gerenciamento de pagamentos" width="250"/>
+  <img src="<img width="895" height="560" alt="Gerenciador (1)" src="https://github.com/user-attachments/assets/82354f34-e0f0-4288-8ddd-1c5d00ae6adc" />
+" alt="Formulário de registro" width="250"/>
+  <img src="<img width="1019" height="546" alt="Gerenciador (2)" src="https://github.com/user-attachments/assets/02ef8d05-3ea8-4dfd-a65f-3bfde74b9b48" />
+" alt="Comprovante PDF gerado" width="250"/>
+</div>
 
 ## 📱 Funcionalidades
 
 - **Controle de Saldo**: Visualização clara do valor total combinado, valor já pago e saldo restante.
 - **Histórico Detalhado**: Lista de todos os pagamentos com data e descrição.
 - **Edição e Exclusão**: Possibilidade de corrigir lançamentos errados facilmente (valor ou texto).
-- **Exportação Excel**: Gera planilha detalhada (.xlsx) com gráfico de rosca integrado para análise visual, sem
-- - **Exportação PDF**: Gera comprovante profissional em PDF com todos os dados da empreitada e gráfico visual.linhas de grade para impressão limpa.
+- **Exportação Excel**: Gera planilha detalhada (.xlsx) com gráfico de rosca integrado para análise visual, sem linhas de grade para impressão limpa.
+- **Exportação PDF**: Gera comprovante profissional em PDF com todos os dados da empreitada e gráfico visual.
 - **Mobile First**: Interface otimizada para uso em celulares, com botões grandes e layout responsivo.
 - **Instalável (PWA)**: Pode ser adicionado à tela inicial do celular como um aplicativo nativo.
 
@@ -44,12 +50,12 @@ Este é um projeto Client-Side. Isso significa que:
 - HTML5 & CSS3 (TailwindCSS)
 - JavaScript (Vanilla)
 - ExcelJS (Para geração de planilhas profissionais)
-- - jsPDF (Para geração de PDF com comprovantes de pagamento)
+- jsPDF (Para geração de PDF com comprovantes de pagamento)
 - Chart.js (Para gráficos visuais)
 - Lucide Icons (Ícones da interface)
 
 ---
 
 <div align="center">
-Desenvolvido com ❤️ por José Bernardo para facilitar o controle financeiro de obras
+  Desenvolvido com ❤️ por José Bernardo para facilitar o controle financeiro de obras
 </div>
