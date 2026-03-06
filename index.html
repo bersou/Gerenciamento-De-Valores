@@ -101,7 +101,7 @@
             <div class="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
         </div>
     </div>
-
+    
     <!-- Canvas Oculto para Gráfico Excel -->
     <canvas id="excelChartCanvas" width="600" height="600" style="display:none;"></canvas>
 
@@ -239,8 +239,34 @@
         </div>
     </div>
 
-    <script>
-        // --- LOGICA DA TELA DE INTRODUÇÃO ---
+    <!-- SCRIPT DO FIREBASE ATUALIZADO COM AS SUAS CREDENCIAIS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // SUAS CREDENCIAIS FORAM INSERIDAS AQUI!
+        // =========================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb317Atb56cadohtLiIeHB5j3OvUom87w",
+            authDomain: "gerenciamento-5bd51.firebaseapp.com",
+            projectId: "gerenciamento-5bd51",
+            storageBucket: "gerenciamento-5bd51.firebasestorage.app",
+            messagingSenderId: "530552502997",
+            appId: "1:530552502997:web:ae7019e77c4aaa35b0005c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        let currentUser = null;
+        
+        // Variáveis de Estado
+        let state = { totalGoal: 0, payments: [] };
+        let editingId = null;
+
+        // --- LOGICA DA TELA DE INTRODUÇÃO E PWA ---
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
@@ -249,7 +275,6 @@
             }, 1800); 
         });
 
-        // --- PWA Setup ---
         let deferredPrompt;
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
@@ -262,46 +287,60 @@
             if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
         });
 
-        // --- App Logic ---
-        let state = { totalGoal: 0, payments: [] };
-        let editingId = null;
-
+        // --- INICIALIZAÇÃO E AUTENTICAÇÃO ---
         document.addEventListener('DOMContentLoaded', () => {
-            loadData(); render(); lucide.createIcons();
+            render(); 
+            lucide.createIcons();
             if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+            
+            // Faz login anónimo automaticamente para guardar dados no Firebase
+            signInAnonymously(auth).catch(error => console.error("Erro no Firebase Auth:", error));
         });
 
-        function loadData() {
-            const savedPayments = localStorage.getItem('artemioApp_payments');
-            const savedGoal = localStorage.getItem('artemioApp_goal');
-            if (savedPayments) state.payments = JSON.parse(savedPayments);
-            if (savedGoal) state.totalGoal = parseFloat(savedGoal);
-        }
-        function saveData() {
-            localStorage.setItem('artemioApp_payments', JSON.stringify(state.payments));
-            localStorage.setItem('artemioApp_goal', state.totalGoal.toString());
-            render();
-        }
+        // Sincronização em Tempo Real (O que resolve o seu problema do cache limpo)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                
+                // Monitorizar Meta (Valor da Empreitada)
+                onSnapshot(doc(db, "usuarios", user.uid, "config", "meta"), (docSnap) => {
+                    state.totalGoal = docSnap.exists() ? docSnap.data().valor : 0;
+                    render();
+                });
 
-        // --- MODAL LÓGICA ---
-        function openGoalModal() {
+                // Monitorizar Pagamentos
+                onSnapshot(collection(db, "usuarios", user.uid, "pagamentos"), (querySnapshot) => {
+                    const fetchedPayments = [];
+                    querySnapshot.forEach((doc) => {
+                        fetchedPayments.push({ id: doc.id, ...doc.data() });
+                    });
+                    // Ordenar por timestamp
+                    state.payments = fetchedPayments.sort((a, b) => b.timestamp - a.timestamp);
+                    render();
+                });
+            }
+        });
+
+        // --- LÓGICA DO MODAL ---
+        window.openGoalModal = () => {
             document.getElementById('goalInput').value = state.totalGoal > 0 ? state.totalGoal : '';
             document.getElementById('goalModal').classList.add('active');
             setTimeout(() => document.getElementById('goalInput').focus(), 100);
-        }
+        };
 
-        function closeGoalModal() {
+        window.closeGoalModal = () => {
             document.getElementById('goalModal').classList.remove('active');
-        }
+        };
 
-        document.getElementById('goalForm').addEventListener('submit', (e) => {
+        document.getElementById('goalForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const inputVal = document.getElementById('goalInput').value;
             const newVal = parseFloat(inputVal.replace(',', '.'));
             
             if (!isNaN(newVal) && newVal >= 0) {
-                state.totalGoal = newVal;
-                saveData();
+                if (currentUser) {
+                    await setDoc(doc(db, "usuarios", currentUser.uid, "config", "meta"), { valor: newVal });
+                }
                 closeGoalModal();
             } else {
                 alert("Por favor, insira um valor válido.");
@@ -312,8 +351,8 @@
             if (e.target === document.getElementById('goalModal')) closeGoalModal();
         });
 
-        // --- ADD/EDIT PAYMENT LÓGICA ---
-        document.getElementById('addForm').addEventListener('submit', (e) => {
+        // --- LÓGICA DE PAGAMENTOS ---
+        document.getElementById('addForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const amountInput = document.getElementById('amountInput');
             const descInput = document.getElementById('descInput');
@@ -322,11 +361,22 @@
             if (isNaN(value) || value <= 0) { alert("Valor inválido."); return; }
 
             if (editingId) {
-                state.payments = state.payments.map(p => p.id === editingId ? { ...p, description: descInput.value.trim(), amount: value } : p);
-                cancelEdit();
+                if (currentUser) {
+                    await updateDoc(doc(db, "usuarios", currentUser.uid, "pagamentos", editingId), {
+                        description: descInput.value.trim(), amount: value
+                    });
+                }
+                window.cancelEdit();
             } else {
                 const now = new Date();
-                state.payments.unshift({ id: Date.now(), description: descInput.value.trim() || 'Pagamento', amount: value, date: now.toLocaleDateString('pt-BR'), timestamp: now });
+                if (currentUser) {
+                    await addDoc(collection(db, "usuarios", currentUser.uid, "pagamentos"), {
+                        description: descInput.value.trim() || 'Pagamento',
+                        amount: value,
+                        date: now.toLocaleDateString('pt-BR'),
+                        timestamp: now.getTime()
+                    });
+                }
                 const btn = document.getElementById('submitBtn');
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = '<i data-lucide="check" size="20"></i> Salvo!';
@@ -336,10 +386,9 @@
             }
             amountInput.value = ''; descInput.value = '';
             if(window.innerWidth > 768 && !editingId) descInput.focus();
-            saveData();
         });
 
-        function startEdit(id) {
+        window.startEdit = (id) => {
             const payment = state.payments.find(p => p.id === id);
             if(!payment) return;
             document.getElementById('descInput').value = payment.description;
@@ -355,9 +404,9 @@
             document.getElementById('cancelEditBtn').classList.remove('hidden');
             lucide.createIcons();
             document.getElementById('addForm').scrollIntoView({behavior: 'smooth', block: 'center'});
-        }
+        };
 
-        function cancelEdit() {
+        window.cancelEdit = () => {
             editingId = null;
             document.getElementById('amountInput').value = ''; document.getElementById('descInput').value = '';
             const formContainer = document.getElementById('formContainer');
@@ -368,17 +417,60 @@
             submitBtn.classList.add('bg-blue-600', 'shadow-blue-200'); submitBtn.classList.remove('bg-amber-500', 'hover:bg-amber-600', 'shadow-amber-200');
             document.getElementById('cancelEditBtn').classList.add('hidden');
             lucide.createIcons();
-        }
+        };
 
-        function deletePayment(id) {
+        window.deletePayment = async (id) => {
             if(confirm('Apagar registro?')) {
-                state.payments = state.payments.filter(p => p.id !== id);
-                if(editingId === id) cancelEdit();
-                saveData();
+                if (currentUser) {
+                    await deleteDoc(doc(db, "usuarios", currentUser.uid, "pagamentos", id));
+                }
+                if(editingId === id) window.cancelEdit();
             }
-        }
+        };
 
         const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        
+        // --- RENDER E EXPORTAÇÕES ---
+        function render() {
+            const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
+            const remaining = state.totalGoal - totalPaid;
+            const progress = state.totalGoal > 0 ? Math.min(100, Math.max(0, (totalPaid / state.totalGoal) * 100)) : 0;
+            document.getElementById('totalGoalDisplay').innerText = formatCurrency(state.totalGoal);
+            document.getElementById('totalPaidDisplay').innerText = formatCurrency(totalPaid);
+            document.getElementById('paymentCountDisplay').innerText = `${state.payments.length} pgto(s)`;
+            const remainingEl = document.getElementById('remainingDisplay');
+            remainingEl.innerText = formatCurrency(remaining);
+            remainingEl.className = remaining <= 0 ? "text-xl md:text-2xl font-bold text-green-600" : "text-xl md:text-2xl font-bold text-red-600";
+            document.getElementById('cardProgressBar').style.width = `${progress}%`;
+            document.getElementById('mainProgressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').innerText = `${Math.round(progress)}%`;
+            const listEl = document.getElementById('paymentsList');
+            const emptyEl = document.getElementById('emptyState');
+            if (state.payments.length === 0) { listEl.classList.add('hidden'); emptyEl.classList.remove('hidden'); } 
+            else {
+                emptyEl.classList.add('hidden'); listEl.classList.remove('hidden'); listEl.innerHTML = '';
+                state.payments.forEach(payment => {
+                    const item = document.createElement('div');
+                    item.className = "p-4 flex items-center justify-between hover:bg-slate-50 border-b border-slate-50 transition group";
+                    const isEditing = editingId === payment.id;
+                    const bgClass = isEditing ? "bg-amber-50 border-l-4 border-amber-400" : "";
+                    
+                    item.innerHTML = `
+                        <div class="flex items-center gap-3 ${bgClass} rounded-lg p-2 transition-colors">
+                            <div class="flex flex-col items-center justify-center bg-slate-50 text-slate-600 px-2 py-1.5 rounded-lg border border-slate-200 min-w-[60px] shadow-sm"><span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">DATA</span><span class="text-xs font-bold">${payment.date.substring(0, 5)}</span></div>
+                            <div class="overflow-hidden"><p class="font-bold text-slate-800 text-sm truncate pr-2">${payment.description}</p><p class="text-[10px] text-slate-400 truncate">Em ${payment.date}</p></div>
+                        </div>
+                        <div class="flex items-center gap-2 pl-2">
+                            <span class="font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1">- ${formatCurrency(payment.amount)}</span>
+                            <button onclick="startEdit('${payment.id}')" class="text-slate-300 hover:text-amber-500 p-2 rounded-full hover:bg-amber-50 transition active:scale-90" title="Editar"><i data-lucide="pencil" size="16"></i></button>
+                            <button onclick="deletePayment('${payment.id}')" class="text-slate-300 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition active:scale-90" title="Excluir"><i data-lucide="trash-2" size="16"></i></button>
+                        </div>
+                    `;
+                    listEl.appendChild(item);
+                });
+                lucide.createIcons();
+            }
+        }
 
         async function generateChartImage(totalPaid, remaining) {
             const canvas = document.getElementById('excelChartCanvas');
@@ -402,7 +494,7 @@
             });
         }
 
-        async function exportToExcel() {
+        window.exportToExcel = async () => {
             if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
             const remaining = state.totalGoal - totalPaid;
@@ -434,13 +526,12 @@
             saveAs(blob, `Controle_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
         }
 
-        // --- FUNÇÃO DE EXPORTAR PDF ESTILO NOTA (Comprovante) ---
-        async function exportToPDF() {
+        window.exportToPDF = async () => {
             if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
+             
             // --- CABEÇALHO ---
             doc.setFillColor(30, 41, 59); // Slate-800
             doc.rect(0, 0, 210, 30, 'F'); 
@@ -457,7 +548,7 @@
             doc.setTextColor(71, 85, 105);
             doc.text(`Emitido em: ${dataEmissao} às ${horaEmissao}`, 14, 40);
 
-            // --- CAIXAS DE RESUMO (Ajustadas) ---
+            // --- CAIXAS DE RESUMO ---
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
             const remaining = state.totalGoal - totalPaid;
             
@@ -534,46 +625,6 @@
             });
             
             doc.save(`Comprovante_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
-        }
-
-        function render() {
-            const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
-            const remaining = state.totalGoal - totalPaid;
-            const progress = state.totalGoal > 0 ? Math.min(100, Math.max(0, (totalPaid / state.totalGoal) * 100)) : 0;
-            document.getElementById('totalGoalDisplay').innerText = formatCurrency(state.totalGoal);
-            document.getElementById('totalPaidDisplay').innerText = formatCurrency(totalPaid);
-            document.getElementById('paymentCountDisplay').innerText = `${state.payments.length} pgto(s)`;
-            const remainingEl = document.getElementById('remainingDisplay');
-            remainingEl.innerText = formatCurrency(remaining);
-            remainingEl.className = remaining <= 0 ? "text-xl md:text-2xl font-bold text-green-600" : "text-xl md:text-2xl font-bold text-red-600";
-            document.getElementById('cardProgressBar').style.width = `${progress}%`;
-            document.getElementById('mainProgressBar').style.width = `${progress}%`;
-            document.getElementById('progressText').innerText = `${Math.round(progress)}%`;
-            const listEl = document.getElementById('paymentsList');
-            const emptyEl = document.getElementById('emptyState');
-            if (state.payments.length === 0) { listEl.classList.add('hidden'); emptyEl.classList.remove('hidden'); } 
-            else {
-                emptyEl.classList.add('hidden'); listEl.classList.remove('hidden'); listEl.innerHTML = '';
-                state.payments.forEach(payment => {
-                    const item = document.createElement('div');
-                    item.className = "p-4 flex items-center justify-between hover:bg-slate-50 border-b border-slate-50 transition group";
-                    const isEditing = editingId === payment.id;
-                    const bgClass = isEditing ? "bg-amber-50 border-l-4 border-amber-400" : "";
-                    item.innerHTML = `
-                        <div class="flex items-center gap-3 ${bgClass} rounded-lg p-2 transition-colors">
-                            <div class="flex flex-col items-center justify-center bg-slate-50 text-slate-600 px-2 py-1.5 rounded-lg border border-slate-200 min-w-[60px] shadow-sm"><span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">DATA</span><span class="text-xs font-bold">${payment.date.substring(0, 5)}</span></div>
-                            <div class="overflow-hidden"><p class="font-bold text-slate-800 text-sm truncate pr-2">${payment.description}</p><p class="text-[10px] text-slate-400 truncate">Em ${payment.date}</p></div>
-                        </div>
-                        <div class="flex items-center gap-2 pl-2">
-                            <span class="font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1">- ${formatCurrency(payment.amount)}</span>
-                            <button onclick="startEdit(${payment.id})" class="text-slate-300 hover:text-amber-500 p-2 rounded-full hover:bg-amber-50 transition active:scale-90" title="Editar"><i data-lucide="pencil" size="16"></i></button>
-                            <button onclick="deletePayment(${payment.id})" class="text-slate-300 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition active:scale-90" title="Excluir"><i data-lucide="trash-2" size="16"></i></button>
-                        </div>
-                    `;
-                    listEl.appendChild(item);
-                });
-                lucide.createIcons();
-            }
         }
     </script>
 </body>
