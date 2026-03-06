@@ -8,10 +8,9 @@
     <title>Gerenciamento</title>
     <meta name="description" content="Controle financeiro de empreitada e pagamentos semanais.">
 
-    <!-- CONFIGURAÇÃO DO LINK PREVIEW (WHATSAPP/FACEBOOK) -->
+    <!-- CONFIGURAÇÃO DO LINK PREVIEW -->
     <meta property="og:title" content="Gerenciamento de Pagamentos">
     <meta property="og:description" content="Controle financeiro de obra. Valor total, pagos e saldo restante.">
-    <!-- Nova Imagem de Preview que você enviou -->
     <meta property="og:image" content="https://plus.unsplash.com/premium_vector-1682305492040-a272f5d4d3db?q=80&w=1316&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
@@ -21,7 +20,6 @@
     <!-- Configurações PWA -->
     <meta name="theme-color" content="#ffffff">
     <link rel="manifest" href="./manifest.json">
-    <!-- Ícones da Aplicação (Logo correto) -->
     <link rel="icon" href="https://iili.io/q91MH3x.jpg">
     <link rel="apple-touch-icon" href="https://iili.io/q91MH3x.jpg">
     <meta name="apple-mobile-web-app-title" content="Gerenciamento">
@@ -32,16 +30,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- ExcelJS e FileSaver -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-
-    <!-- jsPDF e AutoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
@@ -53,26 +45,20 @@
         input { font-size: 16px !important; }
         .touch-target { min-height: 48px; }
         
-        /* Modal Animation */
+        /* Animações de Modal */
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; opacity: 0; visibility: hidden; }
         .modal.active { opacity: 1; visibility: visible; }
         .modal-content { transform: scale(0.95); transition: transform 0.3s ease; }
         .modal.active .modal-content { transform: scale(1); }
 
-        /* Efeito no Título Principal */
+        /* Efeito de Brilho no Título */
         .text-gradient-shine {
             background: linear-gradient(to right, #0f172a, #2563eb, #3b82f6, #0f172a);
-            background-size: 200% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            background-clip: text;
-            animation: shine 4s linear infinite;
+            background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; animation: shine 4s linear infinite;
         }
-        @keyframes shine {
-            to { background-position: 200% center; }
-        }
-
-        /* ANIMAÇÕES DA TELA DE INTRODUÇÃO (SPLASH SCREEN) */
+        @keyframes shine { to { background-position: 200% center; } }
+        
+        /* Animações da Tela de Introdução */
         .splash-hidden { opacity: 0; pointer-events: none; visibility: hidden; }
         .animate-fade-up { animation: fadeUp 0.8s ease-out forwards; opacity: 0; transform: translateY(15px); }
         .animate-pulse-slow { animation: pulseSlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
@@ -81,20 +67,14 @@
     </style>
 </head>
 <body class="text-slate-800 min-h-screen pb-safe">
-  
+
     <!-- TELA DE INTRODUÇÃO (SPLASH SCREEN) -->
     <div id="splash-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white transition-opacity duration-700">
-        <!-- Logo animada -->
         <div class="relative animate-pulse-slow">
             <div class="absolute -inset-4 bg-blue-100 rounded-full blur-xl opacity-70 animate-pulse"></div>
-            <!-- Imagem do Logo na Intro -->
             <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-32 h-32 object-contain relative z-10 mix-blend-multiply">
         </div>
-        
-        <!-- Título -->
         <h1 class="mt-6 text-3xl font-extrabold text-slate-900 animate-fade-up tracking-tight">Gerenciamento</h1>
-        
-        <!-- Pontos de Carregamento -->
         <div class="mt-4 flex gap-1.5 animate-fade-up" style="animation-delay: 0.3s;">
             <div class="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce"></div>
             <div class="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
@@ -102,24 +82,45 @@
         </div>
     </div>
 
-    <!-- Canvas Oculto para Gráfico Excel -->
+    <!-- TELA DE LOGIN E CADASTRO -->
+    <div id="auth-screen" class="fixed inset-0 z-[80] bg-slate-50 flex flex-col items-center justify-center p-6 transition-opacity duration-500 hidden">
+        <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-24 h-24 mb-6 mix-blend-multiply animate-pulse-slow">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm border border-slate-100 fade-in">
+            <h2 id="auth-title" class="text-2xl font-extrabold text-slate-800 text-center mb-6 text-gradient-shine">Entrar</h2>
+            <form id="auth-form" class="flex flex-col gap-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">E-mail</label>
+                    <input type="email" id="emailInput" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Senha</label>
+                    <input type="password" id="passwordInput" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
+                </div>
+                <div id="auth-error-container" class="hidden bg-red-50 border border-red-200 text-red-600 text-xs font-bold p-3 rounded-lg text-center mt-2">
+                    <span id="auth-error"></span>
+                </div>
+                <button type="submit" id="auth-submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 mt-2">Entrar</button>
+            </form>
+            <div class="mt-6 text-center">
+                <button id="auth-toggle" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Não tem conta? <span class="text-blue-600">Criar agora</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CANVAS OCULTO PARA EXPORTAR EXCEL -->
     <canvas id="excelChartCanvas" width="600" height="600" style="display:none;"></canvas>
 
-    <!-- MODAL DE EDIÇÃO DE META -->
+    <!-- MODAL DE VALOR DA EMPREITADA -->
     <div id="goalModal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
         <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-slate-100">
             <div class="text-center mb-6">
-                <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-600">
-                    <i data-lucide="briefcase" size="24"></i>
-                </div>
+                <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-600"><i data-lucide="briefcase" size="24"></i></div>
                 <h3 class="text-lg font-bold text-slate-900">Valor da Empreitada</h3>
                 <p class="text-sm text-slate-500">Defina o valor total combinado.</p>
             </div>
-            
             <form id="goalForm">
                 <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">Novo Valor (R$)</label>
                 <input type="number" id="goalInput" step="0.01" placeholder="0,00" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-2xl font-bold text-center text-slate-800 mb-6">
-                
                 <div class="flex gap-3">
                     <button type="button" onclick="closeGoalModal()" class="w-1/2 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition">Cancelar</button>
                     <button type="submit" class="w-1/2 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition">Salvar</button>
@@ -128,36 +129,28 @@
         </div>
     </div>
 
-    <div class="max-w-xl mx-auto min-h-screen flex flex-col p-4 md:p-6 space-y-5 fade-in">
+    <!-- CONTEÚDO PRINCIPAL (APP) -->
+    <div id="main-app" class="max-w-xl mx-auto min-h-screen flex flex-col p-4 md:p-6 space-y-5 fade-in hidden">
         
-        <!-- Cabeçalho Principal do App -->
         <div class="text-center py-6 relative">
             <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-32 h-32 mx-auto mb-8 object-contain mix-blend-multiply">
-            <h1 class="text-2xl md:text-3xl font-extrabold leading-tight text-gradient-shine tracking-tight px-2">
-                Gerenciamento de Pagamentos
-            </h1>
+            <h1 class="text-2xl md:text-3xl font-extrabold leading-tight text-gradient-shine tracking-tight px-2">Gerenciamento de Pagamentos</h1>
             <button id="installAppBtn" class="hidden mt-4 bg-slate-900 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 mx-auto hover:bg-slate-800 transition">
                 <i data-lucide="download" size="16"></i> Instalar App
             </button>
         </div>
 
-        <!-- Cards de Resumo -->
+        <!-- CARDS DE RESUMO -->
         <div class="grid grid-cols-1 gap-3">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
-                    <div class="flex items-center gap-2 mb-1 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                        <i data-lucide="briefcase" size="14"></i> Valor Da Empreitada
-                    </div>
+                    <div class="flex items-center gap-2 mb-1 text-slate-500 text-xs font-bold uppercase tracking-wider"><i data-lucide="briefcase" size="14"></i> Valor Da Empreitada</div>
                     <div class="flex items-center gap-3">
-                        <div class="text-3xl font-bold text-slate-800 cursor-pointer border-b border-dashed border-slate-300 hover:border-blue-500 hover:text-blue-600 transition" onclick="openGoalModal()" id="totalGoalDisplay" title="Clique para editar">R$ 0,00</div>
-                        <button onclick="openGoalModal()" class="bg-slate-50 p-2 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-100 transition active:scale-95 border border-slate-200">
-                            <i data-lucide="pencil" size="16"></i>
-                        </button>
+                        <div class="text-3xl font-bold text-slate-800 cursor-pointer border-b border-dashed border-slate-300 hover:border-blue-500 hover:text-blue-600 transition" onclick="openGoalModal()" id="totalGoalDisplay">R$ 0,00</div>
+                        <button onclick="openGoalModal()" class="bg-slate-50 p-2 rounded-full text-slate-400 hover:text-blue-600 transition active:scale-95 border border-slate-200"><i data-lucide="pencil" size="16"></i></button>
                     </div>
                 </div>
-                <div class="bg-slate-50 p-3 rounded-full text-slate-400 border border-slate-100">
-                    <i data-lucide="layers" size="24"></i>
-                </div>
+                <div class="bg-slate-50 p-3 rounded-full text-slate-400 border border-slate-100"><i data-lucide="layers" size="24"></i></div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -173,24 +166,19 @@
                 </div>
             </div>
         </div>
-
-        <!-- Barra Progresso -->
+        
+        <!-- BARRA DE PROGRESSO -->
         <div class="bg-white px-5 py-4 rounded-xl shadow-sm border border-slate-200">
-            <div class="flex justify-between text-xs mb-2 font-semibold text-slate-600 uppercase tracking-wide">
-                <span>Progresso</span> <span id="progressText">0%</span>
-            </div>
-            <div class="w-full bg-slate-50 rounded-full h-3 overflow-hidden border border-slate-100">
-                <div id="mainProgressBar" class="progress-bar bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-sm" style="width: 0%"></div>
-            </div>
+            <div class="flex justify-between text-xs mb-2 font-semibold text-slate-600 uppercase tracking-wide"><span>Progresso</span> <span id="progressText">0%</span></div>
+            <div class="w-full bg-slate-50 rounded-full h-3 overflow-hidden border border-slate-100"><div id="mainProgressBar" class="progress-bar bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-sm" style="width: 0%"></div></div>
         </div>
 
-        <!-- Form (Alterado para incluir a Data sem quebrar o layout) -->
+        <!-- FORMULÁRIO DE REGISTO -->
         <div class="bg-white p-5 rounded-2xl shadow-md border-t-4 border-blue-600 relative transition-all duration-300" id="formContainer">
             <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2" id="formTitle">
                 <span class="bg-blue-50 text-blue-600 rounded-lg p-1.5 border border-blue-100"><i data-lucide="plus" size="18"></i></span> Registrar Pagamento
             </h2>
             <form id="addForm" class="flex flex-col gap-4">
-                              
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="col-span-2">
                         <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Descrição</label>
@@ -217,20 +205,13 @@
             </form>
         </div>
 
-        <!-- Histórico -->
+        <!-- LISTA DE HISTÓRICO -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-grow">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl flex-wrap gap-2">
-                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mr-auto">
-                    <i data-lucide="history" class="text-slate-400" size="18"></i> Histórico
-                </h2>
-                
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mr-auto"><i data-lucide="history" class="text-slate-400" size="18"></i> Histórico</h2>
                 <div class="flex gap-2">
-                    <button onclick="exportToPDF()" class="text-xs font-bold bg-white text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition flex items-center gap-2 active:scale-95 border border-slate-200 shadow-sm">
-                        <i data-lucide="file-text" size="16"></i> PDF
-                    </button>
-                    <button onclick="exportToExcel()" class="text-xs font-bold bg-white text-green-600 px-3 py-2 rounded-lg hover:bg-green-50 transition flex items-center gap-2 active:scale-95 border border-slate-200 shadow-sm">
-                        <i data-lucide="file-spreadsheet" size="16"></i> Excel
-                    </button>
+                    <button onclick="exportToPDF()" class="text-xs font-bold bg-white text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition border border-slate-200 shadow-sm flex items-center gap-2"><i data-lucide="file-text" size="16"></i> PDF</button>
+                    <button onclick="exportToExcel()" class="text-xs font-bold bg-white text-green-600 px-3 py-2 rounded-lg hover:bg-green-50 transition border border-slate-200 shadow-sm flex items-center gap-2"><i data-lucide="file-spreadsheet" size="16"></i> Excel</button>
                 </div>
             </div>
             <div id="emptyState" class="p-10 text-center text-slate-400 flex flex-col items-center justify-center flex-grow">
@@ -241,13 +222,13 @@
         </div>
     </div>
 
-    <!-- SCRIPT DO FIREBASE -->
+    <!-- SCRIPT DO FIREBASE (Autenticação + Cloud Firestore) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // AS SUAS CHAVES DO FIREBASE
+        // CREDENCIAIS DO FIREBASE DO UTILIZADOR
         const firebaseConfig = {
             apiKey: "AIzaSyDb317Atb56cadohtLiIeHB5j3OvUom87w",
             authDomain: "gerenciamento-5bd51.firebaseapp.com",
@@ -260,49 +241,49 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
         let currentUser = null;
-
         let state = { totalGoal: 0, payments: [] };
         let editingId = null;
+        let unsubGoal = null;
+        let unsubPay = null;
 
-        // Funções auxiliares para lidar com as datas entre o banco e o input
+        // --- FUNÇÕES DE DATA ---
         function getTodayISO() {
             const d = new Date();
             const tzOffset = d.getTimezoneOffset() * 60000;
-            return new Date(d.getTime() - tzOffset).toISOString().split('T')[0]; // Retorna YYYY-MM-DD
+            return new Date(d.getTime() - tzOffset).toISOString().split('T')[0]; 
         }
-
         function parseDateToISO(ptBrDate) {
             if (!ptBrDate) return getTodayISO();
             const parts = ptBrDate.split('/');
-            if (parts.length === 3) {
-                return `${parts[2]}-${parts[1]}-${parts[0]}`; // YYYY-MM-DD
-            }
+            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`; 
             return getTodayISO();
         }
-
         function formatISOToPtBr(isoDate) {
             if (!isoDate) return new Date().toLocaleDateString('pt-BR');
             const parts = isoDate.split('-');
-            if (parts.length === 3) {
-                return `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
-            }
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`; 
             return new Date().toLocaleDateString('pt-BR');
         }
-
         function getTimestampFromISO(isoDate) {
             if (!isoDate) return Date.now();
-            const d = new Date(isoDate + 'T12:00:00'); // Evitar problemas de fuso horário definindo meio dia
-            return d.getTime();
+            return new Date(isoDate + 'T12:00:00').getTime(); 
         }
-      
-        // SPLASH SCREEN E PWA
+
+        // --- ARRANQUE E UI ---
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
                 splash.classList.add('splash-hidden');
                 setTimeout(() => splash.remove(), 700);
             }, 1800); 
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('dateInput').value = getTodayISO();
+            lucide.createIcons();
+            if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
         });
 
         let deferredPrompt;
@@ -317,143 +298,153 @@
             if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
         });
 
-        // INICIALIZAÇÃO
-        document.addEventListener('DOMContentLoaded', () => {
-            // Coloca a data de hoje por defeito ao abrir a aplicação
-            document.getElementById('dateInput').value = getTodayISO();
-            render(); 
-            lucide.createIcons();
-            if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
-            
-            signInAnonymously(auth).catch(error => console.error("Erro no Firebase Auth:", error));
+        // --- SISTEMA DE LOGIN / CADASTRO ---
+        let isLoginMode = true;
+        
+        document.getElementById('auth-toggle').addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? "Entrar" : "Criar Conta";
+            document.getElementById('auth-submit').innerText = isLoginMode ? "Entrar" : "Cadastrar";
+            document.getElementById('auth-toggle').innerHTML = isLoginMode ? "Não tem conta? <span class='text-blue-600'>Criar agora</span>" : "Já tem conta? <span class='text-blue-600'>Entrar</span>";
+            document.getElementById('auth-error-container').classList.add('hidden');
         });
 
-        // SINCRONIZAÇÃO EM TEMPO REAL
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const errorContainer = document.getElementById('auth-error-container');
+            const errorText = document.getElementById('auth-error');
+            
+            errorContainer.classList.add('hidden');
+            const submitBtn = document.getElementById('auth-submit');
+            submitBtn.innerText = "Aguarde...";
+            
+            try {
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                }
+                document.getElementById('emailInput').value = '';
+                document.getElementById('passwordInput').value = '';
+            } catch (error) {
+                if(error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorText.innerText = "Email ou senha incorretos.";
+                } else if(error.code === 'auth/email-already-in-use') {
+                    errorText.innerText = "Este email já está cadastrado.";
+                } else if(error.code === 'auth/weak-password') {
+                    errorText.innerText = "A senha deve ter pelo menos 6 caracteres.";
+                } else {
+                    errorText.innerText = "Erro ao conectar. Tente novamente.";
+                }
+                errorContainer.classList.remove('hidden');
+            } finally {
+                submitBtn.innerText = isLoginMode ? "Entrar" : "Cadastrar";
+            }
+        });
+
+        // --- GESTÃO DE ESTADO DO UTILIZADOR ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
                 
-                onSnapshot(doc(db, "usuarios", user.uid, "config", "meta"), (docSnap) => {
+                unsubGoal = onSnapshot(doc(db, "usuarios", user.uid, "config", "meta"), (docSnap) => {
                     state.totalGoal = docSnap.exists() ? docSnap.data().valor : 0;
                     render();
                 });
 
-                onSnapshot(collection(db, "usuarios", user.uid, "pagamentos"), (querySnapshot) => {
+                unsubPay = onSnapshot(collection(db, "usuarios", user.uid, "pagamentos"), (querySnapshot) => {
                     const fetchedPayments = [];
-                    querySnapshot.forEach((doc) => {
-                        fetchedPayments.push({ id: doc.id, ...doc.data() });
-                    });
-                    // Ordena corretamente pelo timestamp real do pagamento
+                    querySnapshot.forEach((doc) => fetchedPayments.push({ id: doc.id, ...doc.data() }));
                     state.payments = fetchedPayments.sort((a, b) => b.timestamp - a.timestamp);
                     render();
                 });
+            } else {
+                currentUser = null;
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+                
+                if (unsubGoal) unsubGoal();
+                if (unsubPay) unsubPay();
+                state = { totalGoal: 0, payments: [] };
+                render();
             }
         });
 
-        // MODAL DA META
+        // --- FUNCIONALIDADE DA APLICAÇÃO ---
         window.openGoalModal = () => {
             document.getElementById('goalInput').value = state.totalGoal > 0 ? state.totalGoal : '';
             document.getElementById('goalModal').classList.add('active');
             setTimeout(() => document.getElementById('goalInput').focus(), 100);
         };
 
-        window.closeGoalModal = () => {
-            document.getElementById('goalModal').classList.remove('active');
-        };
+        window.closeGoalModal = () => document.getElementById('goalModal').classList.remove('active');
 
         document.getElementById('goalForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const inputVal = document.getElementById('goalInput').value;
-            const newVal = parseFloat(inputVal.replace(',', '.'));
-            
-            if (!isNaN(newVal) && newVal >= 0) {
-                if (currentUser) {
-                    await setDoc(doc(db, "usuarios", currentUser.uid, "config", "meta"), { valor: newVal });
-                }
+            const newVal = parseFloat(document.getElementById('goalInput').value.replace(',', '.'));
+            if (!isNaN(newVal) && newVal >= 0 && currentUser) {
+                await setDoc(doc(db, "usuarios", currentUser.uid, "config", "meta"), { valor: newVal });
                 closeGoalModal();
-            } else {
-                alert("Por favor, insira um valor válido.");
             }
         });
 
-        document.getElementById('goalModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('goalModal')) closeGoalModal();
-        });
-
-        // SALVAR OU EDITAR PAGAMENTO
         document.getElementById('addForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const amountInput = document.getElementById('amountInput');
             const descInput = document.getElementById('descInput');
             const dateInput = document.getElementById('dateInput');
+            const value = parseFloat(amountInput.value.replace(',', '.'));
             
-            let valStr = amountInput.value.replace(',', '.');
-            const value = parseFloat(valStr);
-            if (isNaN(value) || value <= 0) { alert("Valor inválido."); return; }
-
+            if (isNaN(value) || value <= 0 || !currentUser) return;
+            
             const formattedDate = formatISOToPtBr(dateInput.value);
             let finalTimestamp = Date.now();
 
             if (editingId) {
-                // Ao editar, verificar se a data mudou para atualizar o timestamp ou manter o antigo exato
                 const existingPayment = state.payments.find(p => p.id === editingId);
-                if (existingPayment && existingPayment.date === formattedDate) {
-                    finalTimestamp = existingPayment.timestamp;
-                } else {
-                    finalTimestamp = getTimestampFromISO(dateInput.value);
-                }
-
-                if (currentUser) {
-                    await updateDoc(doc(db, "usuarios", currentUser.uid, "pagamentos", editingId), {
-                        description: descInput.value.trim(), 
-                        amount: value,
-                        date: formattedDate,
-                        timestamp: finalTimestamp
-                    });
-                }
+                finalTimestamp = (existingPayment && existingPayment.date === formattedDate) ? existingPayment.timestamp : getTimestampFromISO(dateInput.value);
+                
+                await updateDoc(doc(db, "usuarios", currentUser.uid, "pagamentos", editingId), {
+                    description: descInput.value.trim(), amount: value, date: formattedDate, timestamp: finalTimestamp
+                });
                 window.cancelEdit();
             } else {
-                // Se foi escolhida uma data do passado, usar o timestamp desse dia para que a ordem fique certa
-                if (dateInput.value !== getTodayISO()) {
-                    finalTimestamp = getTimestampFromISO(dateInput.value);
-                }
+                if (dateInput.value !== getTodayISO()) finalTimestamp = getTimestampFromISO(dateInput.value);
+                
+                await addDoc(collection(db, "usuarios", currentUser.uid, "pagamentos"), {
+                    description: descInput.value.trim() || 'Pagamento', amount: value, date: formattedDate, timestamp: finalTimestamp
+                });
 
-                if (currentUser) {
-                    await addDoc(collection(db, "usuarios", currentUser.uid, "pagamentos"), {
-                        description: descInput.value.trim() || 'Pagamento',
-                        amount: value,
-                        date: formattedDate,
-                        timestamp: finalTimestamp
-                    });
-                }
                 const btn = document.getElementById('submitBtn');
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = '<i data-lucide="check" size="20"></i> Salvo!';
-                btn.classList.add('bg-green-600', 'text-white'); btn.classList.remove('bg-blue-600');
+                btn.classList.replace('bg-blue-600', 'bg-green-600');
                 lucide.createIcons();
-                setTimeout(() => { if(!editingId) { btn.innerHTML = originalHTML; btn.classList.remove('bg-green-600'); btn.classList.add('bg-blue-600'); lucide.createIcons(); } }, 1500);
+                setTimeout(() => { if(!editingId) { btn.innerHTML = originalHTML; btn.classList.replace('bg-green-600', 'bg-blue-600'); lucide.createIcons(); } }, 1500);
             }
-            amountInput.value = ''; descInput.value = ''; 
-            dateInput.value = getTodayISO(); // Volta o calendário para o dia de hoje
+            amountInput.value = ''; descInput.value = ''; dateInput.value = getTodayISO();
             if(window.innerWidth > 768 && !editingId) descInput.focus();
         });
 
-        // PREPARAR PARA EDITAR
         window.startEdit = (id) => {
             const payment = state.payments.find(p => p.id === id);
             if(!payment) return;
             document.getElementById('descInput').value = payment.description;
             document.getElementById('amountInput').value = payment.amount;
-            // Carrega a data original do pagamento no calendário
             document.getElementById('dateInput').value = parseDateToISO(payment.date);
             editingId = id;
-                        
+            
             const formContainer = document.getElementById('formContainer');
-            formContainer.classList.remove('border-blue-600'); formContainer.classList.add('border-amber-500', 'ring-2', 'ring-amber-100');
+            formContainer.classList.replace('border-blue-600', 'border-amber-500');
+            formContainer.classList.add('ring-2', 'ring-amber-100');
             document.getElementById('formTitle').innerHTML = '<span class="bg-amber-50 text-amber-600 rounded-lg p-1.5 border border-amber-100"><i data-lucide="pencil" size="18"></i></span> Editar Pagamento';
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerHTML = '<i data-lucide="refresh-cw" size="20"></i> Atualizar';
-            submitBtn.classList.remove('bg-blue-600', 'shadow-blue-200'); submitBtn.classList.add('bg-amber-500', 'hover:bg-amber-600', 'shadow-amber-200');
+            submitBtn.className = "w-full text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 touch-target transition-transform active:scale-[0.98] bg-amber-500 hover:bg-amber-600 shadow-amber-200";
             document.getElementById('cancelEditBtn').classList.remove('hidden');
             lucide.createIcons();
             document.getElementById('addForm').scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -466,50 +457,54 @@
             document.getElementById('dateInput').value = getTodayISO();
             
             const formContainer = document.getElementById('formContainer');
-            formContainer.classList.add('border-blue-600'); formContainer.classList.remove('border-amber-500', 'ring-2', 'ring-amber-100');
+            formContainer.classList.replace('border-amber-500', 'border-blue-600');
+            formContainer.classList.remove('ring-2', 'ring-amber-100');
             document.getElementById('formTitle').innerHTML = '<span class="bg-blue-50 text-blue-600 rounded-lg p-1.5 border border-blue-100"><i data-lucide="plus" size="18"></i></span> Registrar Pagamento';
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerHTML = '<i data-lucide="save" size="20"></i> Salvar Pagamento';
-            submitBtn.classList.add('bg-blue-600', 'shadow-blue-200'); submitBtn.classList.remove('bg-amber-500', 'hover:bg-amber-600', 'shadow-amber-200');
+            submitBtn.className = "w-full text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 touch-target transition-transform active:scale-[0.98] bg-blue-600 active:bg-blue-700 shadow-blue-200";
             document.getElementById('cancelEditBtn').classList.add('hidden');
             lucide.createIcons();
         };
 
         window.deletePayment = async (id) => {
-            if(confirm('Apagar registro?')) {
-                if (currentUser) {
-                    await deleteDoc(doc(db, "usuarios", currentUser.uid, "pagamentos", id));
-                }
+            if(confirm('Apagar registro?') && currentUser) {
+                await deleteDoc(doc(db, "usuarios", currentUser.uid, "pagamentos", id));
                 if(editingId === id) window.cancelEdit();
             }
         };
 
         const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
-        // RENDERIZAR TELA
+        // --- RENDERIZAÇÃO ---
         function render() {
             const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
             const remaining = state.totalGoal - totalPaid;
             const progress = state.totalGoal > 0 ? Math.min(100, Math.max(0, (totalPaid / state.totalGoal) * 100)) : 0;
+            
             document.getElementById('totalGoalDisplay').innerText = formatCurrency(state.totalGoal);
             document.getElementById('totalPaidDisplay').innerText = formatCurrency(totalPaid);
             document.getElementById('paymentCountDisplay').innerText = `${state.payments.length} pgto(s)`;
+            
             const remainingEl = document.getElementById('remainingDisplay');
             remainingEl.innerText = formatCurrency(remaining);
             remainingEl.className = remaining <= 0 ? "text-xl md:text-2xl font-bold text-green-600" : "text-xl md:text-2xl font-bold text-red-600";
+            
             document.getElementById('cardProgressBar').style.width = `${progress}%`;
             document.getElementById('mainProgressBar').style.width = `${progress}%`;
             document.getElementById('progressText').innerText = `${Math.round(progress)}%`;
+            
             const listEl = document.getElementById('paymentsList');
             const emptyEl = document.getElementById('emptyState');
-            if (state.payments.length === 0) { listEl.classList.add('hidden'); emptyEl.classList.remove('hidden'); } 
-            else {
+            
+            if (state.payments.length === 0) { 
+                listEl.classList.add('hidden'); emptyEl.classList.remove('hidden'); 
+            } else {
                 emptyEl.classList.add('hidden'); listEl.classList.remove('hidden'); listEl.innerHTML = '';
                 state.payments.forEach(payment => {
                     const item = document.createElement('div');
                     item.className = "p-4 flex items-center justify-between hover:bg-slate-50 border-b border-slate-50 transition group";
-                    const isEditing = editingId === payment.id;
-                    const bgClass = isEditing ? "bg-amber-50 border-l-4 border-amber-400" : "";
+                    const bgClass = editingId === payment.id ? "bg-amber-50 border-l-4 border-amber-400" : "";
                     
                     item.innerHTML = `
                         <div class="flex items-center gap-3 ${bgClass} rounded-lg p-2 transition-colors">
@@ -517,7 +512,7 @@
                             <div class="overflow-hidden"><p class="font-bold text-slate-800 text-sm truncate pr-2">${payment.description}</p><p class="text-[10px] text-slate-400 truncate">Em ${payment.date}</p></div>
                         </div>
                         <div class="flex items-center gap-2 pl-2">
-                            <span class="font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1">- ${formatCurrency(payment.amount)}</span>
+                                              <span class="font-mono font-bold text-green-600 text-sm whitespace-nowrap mr-1">- ${formatCurrency(payment.amount)}</span>
                             <button onclick="startEdit('${payment.id}')" class="text-slate-300 hover:text-amber-500 p-2 rounded-full hover:bg-amber-50 transition active:scale-90" title="Editar"><i data-lucide="pencil" size="16"></i></button>
                             <button onclick="deletePayment('${payment.id}')" class="text-slate-300 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition active:scale-90" title="Excluir"><i data-lucide="trash-2" size="16"></i></button>
                         </div>
@@ -527,7 +522,8 @@
                 lucide.createIcons();
             }
         }
-      
+
+        // --- EXPORTAÇÃO ---
         async function generateChartImage(totalPaid, remaining) {
             const canvas = document.getElementById('excelChartCanvas');
             const ctx = canvas.getContext('2d');
@@ -536,15 +532,7 @@
                 window.excelChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: { labels: ['Pago', 'Restante'], datasets: [{ data: [totalPaid, Math.max(0, remaining)], backgroundColor: ['#16a34a', '#dc2626'], borderWidth: 0 }] },
-                    options: {
-                        responsive: false, layout: { padding: 20 },
-                        plugins: {
-                            legend: { position: 'bottom', labels: { font: { size: 24, weight: 'bold' }, padding: 20 } },
-                            title: { display: true, text: 'Status do Pagamento', font: { size: 28, weight: 'bold' }, padding: { bottom: 20 } },
-                            datalabels: { color: '#ffffff', font: { weight: 'bold', size: 18 }, formatter: (value) => value <= 0 ? '' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value), anchor: 'center', align: 'center', backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 4, padding: 6 }
-                        },
-                        animation: { onComplete: () => resolve(canvas.toDataURL('image/png')) }
-                    },
+                    options: { responsive: false, layout: { padding: 20 }, plugins: { legend: { position: 'bottom', labels: { font: { size: 24, weight: 'bold' }, padding: 20 } }, title: { display: true, text: 'Status do Pagamento', font: { size: 28, weight: 'bold' }, padding: { bottom: 20 } }, datalabels: { color: '#ffffff', font: { weight: 'bold', size: 18 }, formatter: (value) => value <= 0 ? '' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value), anchor: 'center', align: 'center', backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 4, padding: 6 } }, animation: { onComplete: () => resolve(canvas.toDataURL('image/png')) } },
                     plugins: [ChartDataLabels]
                 });
             });
@@ -559,124 +547,41 @@
             const worksheet = workbook.addWorksheet('Pagamentos', { views: [{ showGridLines: false }] });
             worksheet.columns = [{ header: 'Data', key: 'date', width: 15 }, { header: 'Descrição', key: 'description', width: 30 }, { header: 'Valor (R$)', key: 'amount', width: 20 }, { width: 5 }, { width: 60 }];
             const headerRow = worksheet.getRow(1);
-            headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } };
-            headerRow.alignment = { horizontal: 'center' };
+            headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } }; headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } }; headerRow.alignment = { horizontal: 'center' };
             state.payments.forEach(p => {
                 const row = worksheet.addRow({ date: p.date, description: p.description, amount: p.amount });
-                row.getCell('amount').numFmt = '"R$" #,##0.00';
-                row.getCell('date').alignment = { horizontal: 'center' };
+                row.getCell('amount').numFmt = '"R$" #,##0.00'; row.getCell('date').alignment = { horizontal: 'center' };
                 row.eachCell((cell) => { if(cell.col <= 3) cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; });
             });
             const totalRow = worksheet.addRow({ description: 'TOTAL PAGO:', amount: totalPaid });
-            totalRow.font = { bold: true };
-            totalRow.getCell('description').alignment = { horizontal: 'right' };
-            totalRow.getCell('amount').numFmt = '"R$" #,##0.00';
-            totalRow.getCell('amount').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCFCE7' } };
-            totalRow.getCell('description').border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-            totalRow.getCell('amount').border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            totalRow.font = { bold: true }; totalRow.getCell('description').alignment = { horizontal: 'right' }; totalRow.getCell('amount').numFmt = '"R$" #,##0.00'; totalRow.getCell('amount').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCFCE7' } };
+            totalRow.getCell('description').border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }; totalRow.getCell('amount').border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
             const imageId = workbook.addImage({ base64: chartBase64, extension: 'png' });
             worksheet.addImage(imageId, { tl: { col: 4, row: 1 }, br: { col: 5, row: 22 } });
             const buffer = await workbook.xlsx.writeBuffer();
-            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            saveAs(blob, `Controle_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
-        }
+            saveAs(new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `Controle_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
+        };
 
         window.exportToPDF = async () => {
             if (state.payments.length === 0) { alert("Sem dados para exportar."); return; }
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFillColor(30, 41, 59); 
-            doc.rect(0, 0, 210, 30, 'F'); 
-            doc.setFontSize(18);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(255, 255, 255);
-            doc.text("Comprovante de Pagamentos", 105, 18, { align: 'center' }); 
-
-            const dataEmissao = new Date().toLocaleDateString('pt-BR');
-            const horaEmissao = new Date().toLocaleTimeString('pt-BR');
-            doc.setFontSize(10);
-            doc.setTextColor(71, 85, 105);
-            doc.text(`Emitido em: ${dataEmissao} às ${horaEmissao}`, 14, 40);
-
-            const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0);
-            const remaining = state.totalGoal - totalPaid;
-            
-            const boxY = 48;
-            const boxHeight = 22;
-            const boxWidth = 58;
-            const gap = 6;
-            const startX = 14;
-
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.setFillColor(30, 41, 59); doc.rect(0, 0, 210, 30, 'F'); doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.setTextColor(255, 255, 255); doc.text("Comprovante de Pagamentos", 105, 18, { align: 'center' }); 
+            const dataEmissao = new Date().toLocaleDateString('pt-BR'); const horaEmissao = new Date().toLocaleTimeString('pt-BR');
+            doc.setFontSize(10); doc.setTextColor(71, 85, 105); doc.text(`Emitido em: ${dataEmissao} às ${horaEmissao}`, 14, 40);
+            const totalPaid = state.payments.reduce((acc, curr) => acc + curr.amount, 0); const remaining = state.totalGoal - totalPaid;
+            const boxY = 48; const boxHeight = 22; const boxWidth = 58; const gap = 6; const startX = 14;
             function drawStatBox(x, label, value, bgColor, txtColor) {
-                doc.setDrawColor(200, 200, 200);
-                doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-                doc.roundedRect(x, boxY, boxWidth, boxHeight, 2, 2, 'FD');
-                
-                doc.setFontSize(9);
-                doc.setTextColor(100, 100, 100);
-                doc.text(label, x + (boxWidth/2), boxY + 7, { align: 'center' });
-                
-                doc.setFontSize(12);
-                doc.setFont("helvetica", "bold");
-                doc.setTextColor(txtColor[0], txtColor[1], txtColor[2]);
-                doc.text(value, x + (boxWidth/2), boxY + 16, { align: 'center' });
+                doc.setDrawColor(200, 200, 200); doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]); doc.roundedRect(x, boxY, boxWidth, boxHeight, 2, 2, 'FD');
+                doc.setFontSize(9); doc.setTextColor(100, 100, 100); doc.text(label, x + (boxWidth/2), boxY + 7, { align: 'center' });
+                doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(txtColor[0], txtColor[1], txtColor[2]); doc.text(value, x + (boxWidth/2), boxY + 16, { align: 'center' });
             }
-
             drawStatBox(startX, "VALOR TOTAL", formatCurrency(state.totalGoal), [255, 255, 255], [30, 41, 59]);
             drawStatBox(startX + boxWidth + gap, "JÁ PAGO", formatCurrency(totalPaid), [240, 253, 244], [22, 163, 74]);
             drawStatBox(startX + (boxWidth + gap)*2, "SALDO A PAGAR", formatCurrency(remaining), [254, 242, 242], [220, 38, 38]);
-
-            const tableColumn = ["DATA", "DESCRIÇÃO", "VALOR"];
-            const tableRows = [];
-
-            state.payments.forEach(payment => {
-                tableRows.push([
-                    payment.date,
-                    payment.description.toUpperCase(),
-                    formatCurrency(payment.amount)
-                ]);
-            });
-
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: boxY + boxHeight + 15,
-                theme: 'striped', 
-                styles: {
-                    fontSize: 12, 
-                    cellPadding: 6, 
-                    textColor: [51, 65, 85],
-                    lineWidth: 0.1,
-                    lineColor: [203, 213, 225]
-                },
-                headStyles: { 
-                    fillColor: [51, 65, 85], 
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    halign: 'center',
-                    fontSize: 12
-                },
-                columnStyles: {
-                    0: { cellWidth: 40, halign: 'center' },
-                    1: { cellWidth: 'auto' },
-                    2: { cellWidth: 50, halign: 'right', fontStyle: 'bold' }
-                },
-                foot: [['', 'TOTAL GERAL', formatCurrency(totalPaid)]],
-                footStyles: {
-                    fillColor: [241, 245, 249],
-                    textColor: [30, 41, 59],
-                    fontStyle: 'bold',
-                    halign: 'right',
-                    fontSize: 14 
-                },
-                didDrawPage: function (data) {}
-            });
-            
+            const tableRows = state.payments.map(payment => [payment.date, payment.description.toUpperCase(), formatCurrency(payment.amount)]);
+            doc.autoTable({ head: [["DATA", "DESCRIÇÃO", "VALOR"]], body: tableRows, startY: boxY + boxHeight + 15, theme: 'striped', styles: { fontSize: 12, cellPadding: 6, textColor: [51, 65, 85], lineWidth: 0.1, lineColor: [203, 213, 225] }, headStyles: { fillColor: [51, 65, 85], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', fontSize: 12 }, columnStyles: { 0: { cellWidth: 40, halign: 'center' }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 50, halign: 'right', fontStyle: 'bold' } }, foot: [['', 'TOTAL GERAL', formatCurrency(totalPaid)]], footStyles: { fillColor: [241, 245, 249], textColor: [30, 41, 59], fontStyle: 'bold', halign: 'right', fontSize: 14 } });
             doc.save(`Comprovante_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
-        }
+        };
     </script>
 </body>
 </html>
