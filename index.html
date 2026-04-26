@@ -139,7 +139,7 @@
                     <p class="text-[10px] text-slate-400 mt-1" id="paymentCountDisplay">0 pgto(s)</p>
                 </div>
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between relative overflow-hidden">
-                    <div class="flex items-center gap-1.5 mb-2 text-slate-500 text-[10px] font-bold uppercase"><i data-lucide="trending-down" size="12"></i> Resta</div>
+                    <div id="remainingLabel" class="flex items-center gap-1.5 mb-2 text-slate-500 text-[10px] font-bold uppercase"><i data-lucide="trending-down" size="12"></i> Resta</div>
                     <div class="text-xl md:text-2xl font-bold text-red-600" id="remainingDisplay">R$ 0,00</div>
                     <div id="cardProgressBar" class="absolute bottom-0 left-0 h-1 bg-green-500 transition-all duration-500" style="width: 0%"></div>
                 </div>
@@ -456,8 +456,20 @@
             document.getElementById('paymentCountDisplay').innerText = `${state.payments.length} pgto(s)`;
             
             const remainingEl = document.getElementById('remainingDisplay');
-            remainingEl.innerText = formatCurrency(remaining);
-            remainingEl.className = remaining <= 0 ? "text-xl md:text-2xl font-bold text-green-600" : "text-xl md:text-2xl font-bold text-red-600";
+            const remainingLabel = document.getElementById('remainingLabel');
+            
+            if (remaining < 0) {
+                remainingEl.innerText = formatCurrency(Math.abs(remaining));
+                remainingEl.className = "text-xl md:text-2xl font-bold text-red-600";
+                remainingLabel.innerHTML = '<i data-lucide="trending-up" size="12"></i> Acima';
+                remainingLabel.className = "flex items-center gap-1.5 mb-2 text-red-600 text-[10px] font-bold uppercase";
+            } else {
+                remainingEl.innerText = formatCurrency(remaining);
+                remainingEl.className = remaining === 0 ? "text-xl md:text-2xl font-bold text-green-600" : "text-xl md:text-2xl font-bold text-red-600";
+                remainingLabel.innerHTML = '<i data-lucide="trending-down" size="12"></i> Resta';
+                remainingLabel.className = "flex items-center gap-1.5 mb-2 text-slate-500 text-[10px] font-bold uppercase";
+            }
+            lucide.createIcons();
             
             document.getElementById('cardProgressBar').style.width = `${progress}%`;
             document.getElementById('mainProgressBar').style.width = `${progress}%`;
@@ -535,7 +547,14 @@
             return new Promise((resolve) => {
                 window.excelChart = new Chart(ctx, {
                     type: 'doughnut',
-                    data: { labels: ['Pago', 'Restante'], datasets: [{ data: [totalPaid, Math.max(0, remaining)], backgroundColor: ['#16a34a', '#dc2626'], borderWidth: 0 }] },
+                    data: { 
+                        labels: ['Pago', remaining < 0 ? 'Acima' : 'Restante'], 
+                        datasets: [{ 
+                            data: [totalPaid, Math.abs(remaining)], 
+                            backgroundColor: ['#16a34a', remaining < 0 ? '#b91c1c' : '#dc2626'], 
+                            borderWidth: 0 
+                        }] 
+                    },
                     options: { responsive: false, layout: { padding: 20 }, plugins: { legend: { position: 'bottom', labels: { font: { size: 24, weight: 'bold' }, padding: 20 } }, title: { display: true, text: 'Status do Pagamento', font: { size: 28, weight: 'bold' }, padding: { bottom: 20 } }, datalabels: { color: '#ffffff', font: { weight: 'bold', size: 18 }, formatter: (value) => value <= 0 ? '' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value), anchor: 'center', align: 'center', backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 4, padding: 6 } }, animation: { onComplete: () => resolve(canvas.toDataURL('image/png')) } },
                     plugins: [ChartDataLabels]
                 });
@@ -581,7 +600,12 @@
             }
             drawStatBox(startX, "VALOR TOTAL", formatCurrency(state.totalGoal), [255, 255, 255], [30, 41, 59]);
             drawStatBox(startX + boxWidth + gap, "JÁ PAGO", formatCurrency(totalPaid), [240, 253, 244], [22, 163, 74]);
-            drawStatBox(startX + (boxWidth + gap)*2, "SALDO A PAGAR", formatCurrency(remaining), [254, 242, 242], [220, 38, 38]);
+            
+            let remainingLabel = remaining < 0 ? "ACIMA" : "SALDO A PAGAR";
+            let remainingValue = formatCurrency(Math.abs(remaining));
+            let remainingBgColor = remaining === 0 ? [240, 253, 244] : [254, 242, 242];
+            let remainingTxtColor = remaining === 0 ? [22, 163, 74] : [220, 38, 38];
+            drawStatBox(startX + (boxWidth + gap)*2, remainingLabel, remainingValue, remainingBgColor, remainingTxtColor);
             const tableRows = state.payments.map(payment => [payment.date, payment.description.toUpperCase(), formatCurrency(payment.amount)]);
             doc.autoTable({ head: [["DATA", "DESCRIÇÃO", "VALOR"]], body: tableRows, startY: boxY + boxHeight + 15, theme: 'striped', styles: { fontSize: 12, cellPadding: 6, textColor: [51, 65, 85], lineWidth: 0.1, lineColor: [203, 213, 225] }, headStyles: { fillColor: [51, 65, 85], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', fontSize: 12 }, columnStyles: { 0: { cellWidth: 40, halign: 'center' }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 50, halign: 'right', fontStyle: 'bold' } }, foot: [['', 'TOTAL GERAL', formatCurrency(totalPaid)]], footStyles: { fillColor: [241, 245, 249], textColor: [30, 41, 59], fontStyle: 'bold', halign: 'right', fontSize: 14 } });
             doc.save(`Comprovante_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
