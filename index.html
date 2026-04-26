@@ -209,19 +209,13 @@
                 const data = localStorage.getItem(this.STORAGE_KEY);
                 if (data) return JSON.parse(data);
                 
-                // Dados Iniciais (Inseridos via Assistente)
-                const initialData = {
-                    totalGoal: 4500, // Ajustado conforme pedido (quase 4 mil e pouco)
-                    payments: [
-                        { id: crypto.randomUUID(), description: "Sexta-feira", amount: 600, date: "10/04/2026", timestamp: new Date("2026-04-10T12:00:00").getTime() },
-                        { id: crypto.randomUUID(), description: "Sábado", amount: 500, date: "28/03/2026", timestamp: new Date("2026-03-28T12:00:00").getTime() },
-                        { id: crypto.randomUUID(), description: "Sexta-feira", amount: 300, date: "20/03/2026", timestamp: new Date("2026-03-20T12:00:00").getTime() },
-                        { id: crypto.randomUUID(), description: "Sábado", amount: 500, date: "14/03/2026", timestamp: new Date("2026-03-14T12:00:00").getTime() },
-                        { id: crypto.randomUUID(), description: "Terça-feira", amount: 1500, date: "03/03/2026", timestamp: new Date("2026-03-03T12:00:00").getTime() }
-                    ]
+                // Se não houver dados, retorna estado vazio
+                const emptyData = {
+                    totalGoal: 0,
+                    payments: []
                 };
-                this.saveData(initialData);
-                return initialData;
+                this.saveData(emptyData);
+                return emptyData;
             },
             
             saveData(data) {
@@ -298,12 +292,8 @@
                     splash.remove();
                     document.getElementById('main-app').classList.remove('hidden');
                     
-                    // Se o totalGoal for 0 e tivermos dados iniciais, forçar atualização
-                    if (state.totalGoal === 0 || state.totalGoal === 4500) {
-                        state.totalGoal = 3801;
-                        LocalDB.setGoal(3801);
-                    }
                     
+
                     render();
                 }, 700);
             }, 1800); 
