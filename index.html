@@ -88,6 +88,27 @@
         </div>
     </div>
 
+    <!-- MODAL DE BACKUP E RESTAURAÇÃO -->
+    <div id="backupModal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-slate-100">
+            <div class="text-center mb-6">
+                <div class="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-indigo-600"><i data-lucide="database" size="24"></i></div>
+                <h3 class="text-lg font-bold text-slate-900">Gerenciar Dados</h3>
+                <p class="text-sm text-slate-500">Faça backup ou restaure seus dados locais.</p>
+            </div>
+            <div class="flex flex-col gap-3 mb-6">
+                <button onclick="exportBackup()" class="w-full py-4 bg-blue-50 text-blue-700 rounded-xl font-bold hover:bg-blue-100 transition flex items-center justify-center gap-2 border border-blue-200">
+                    <i data-lucide="download-cloud" size="20"></i> Exportar Backup (.json)
+                </button>
+                <button onclick="triggerRestore()" class="w-full py-4 bg-amber-50 text-amber-700 rounded-xl font-bold hover:bg-amber-100 transition flex items-center justify-center gap-2 border border-amber-200">
+                    <i data-lucide="upload-cloud" size="20"></i> Restaurar Backup (.json)
+                </button>
+            </div>
+            <button onclick="closeBackupModal()" class="w-full py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition border border-slate-200">Fechar</button>
+        </div>
+    </div>
+
+
     <!-- CONTEÚDO PRINCIPAL (APP) -->
     <div id="main-app" class="max-w-xl mx-auto min-h-screen flex flex-col p-4 md:p-6 space-y-5 fade-in hidden">
         
@@ -163,15 +184,13 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-grow">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl flex-wrap gap-2">
                 <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mr-auto"><i data-lucide="history" class="text-slate-400" size="18"></i> Histórico</h2>
-                    <div id="secretActions" class="hidden flex gap-2 flex-wrap">
-                        <button onclick="exportBackup()" class="text-[10px] font-bold bg-white text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition border border-slate-200 shadow-sm flex items-center gap-2" title="Baixar Backup"><i data-lucide="download-cloud" size="14"></i> Backup</button>
-                        <button onclick="triggerRestore()" class="text-[10px] font-bold bg-white text-amber-600 px-3 py-2 rounded-lg hover:bg-amber-50 transition border border-slate-200 shadow-sm flex items-center gap-2" title="Restaurar Backup"><i data-lucide="upload-cloud" size="14"></i> Restaurar</button>
-                    </div>
+                <div class="flex gap-2 flex-wrap">
                     <button onclick="exportToPDF()" class="text-[10px] font-bold bg-white text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition border border-slate-200 shadow-sm flex items-center gap-2"><i data-lucide="file-text" size="14"></i> PDF</button>
                     <button onclick="exportToExcel()" class="text-[10px] font-bold bg-white text-green-600 px-3 py-2 rounded-lg hover:bg-green-50 transition border border-slate-200 shadow-sm flex items-center gap-2"><i data-lucide="file-spreadsheet" size="14"></i> Excel</button>
                     <input type="file" id="restoreFile" class="hidden" accept=".json" onchange="importBackup(event)">
                 </div>
             </div>
+
             <div id="emptyState" class="p-10 text-center text-slate-400 flex flex-col items-center justify-center flex-grow">
                 <div class="bg-slate-50 p-4 rounded-full mb-3"><i data-lucide="calendar" size="32" class="text-slate-300"></i></div>
                 <p class="text-sm">Nenhum pagamento registrado.</p>
@@ -295,10 +314,10 @@
             el.style.transform = 'scale(0.9)';
             setTimeout(() => el.style.transform = 'scale(1)', 100);
             
-            const actions = document.getElementById('secretActions');
-            actions.classList.toggle('hidden');
-            console.log('Comando secreto alternado');
+            document.getElementById('backupModal').classList.add('active');
         };
+
+        window.closeBackupModal = () => document.getElementById('backupModal').classList.remove('active');
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('dateInput').value = getTodayISO();
