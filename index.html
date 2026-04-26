@@ -64,30 +64,7 @@
         </div>
     </div>
 
-    <!-- TELA DE LOGIN E CADASTRO -->
-    <div id="auth-screen" class="fixed inset-0 z-[80] bg-slate-50 flex flex-col items-center justify-center p-6 transition-opacity duration-500 hidden">
-        <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-24 h-24 mb-6 mix-blend-multiply animate-pulse-slow">
-        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm border border-slate-100 fade-in">
-            <h2 id="auth-title" class="text-2xl font-extrabold text-slate-800 text-center mb-6 text-gradient-shine">Entrar</h2>
-            <form id="auth-form" class="flex flex-col gap-4">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">E-mail</label>
-                    <input type="email" id="emailInput" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Senha</label>
-                    <input type="password" id="passwordInput" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
-                </div>
-                <div id="auth-error-container" class="hidden bg-red-50 border border-red-200 text-red-600 text-xs font-bold p-3 rounded-lg text-center mt-2">
-                    <span id="auth-error"></span>
-                </div>
-                <button type="submit" id="auth-submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 mt-2">Entrar</button>
-            </form>
-            <div class="mt-6 text-center">
-                <button id="auth-toggle" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Não tem conta? <span class="text-blue-600">Criar agora</span></button>
-            </div>
-        </div>
-    </div>
+
     
     <!-- CANVAS OCULTO PARA EXPORTAR EXCEL -->
     <canvas id="excelChartCanvas" width="600" height="600" style="display:none;"></canvas>
@@ -115,7 +92,7 @@
     <div id="main-app" class="max-w-xl mx-auto min-h-screen flex flex-col p-4 md:p-6 space-y-5 fade-in hidden">
         
         <div class="text-center py-6 relative">
-            <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-32 h-32 mx-auto mb-8 object-contain mix-blend-multiply">
+            <img src="https://iili.io/q91MH3x.jpg" alt="Logo" class="w-32 h-32 mx-auto mb-8 object-contain mix-blend-multiply cursor-pointer" onclick="logoClick()">
             <h1 class="text-2xl md:text-3xl font-extrabold leading-tight text-gradient-shine tracking-tight px-2">Gerenciamento de Pagamentos</h1>
             <button id="installAppBtn" class="hidden mt-4 bg-slate-900 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 mx-auto hover:bg-slate-800 transition">
                 <i data-lucide="download" size="16"></i> Instalar App
@@ -186,9 +163,13 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-grow">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl flex-wrap gap-2">
                 <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mr-auto"><i data-lucide="history" class="text-slate-400" size="18"></i> Histórico</h2>
-                <div class="flex gap-2">
-                    <button onclick="exportToPDF()" class="text-xs font-bold bg-white text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition border border-slate-200 shadow-sm flex items-center gap-2"><i data-lucide="file-text" size="16"></i> PDF</button>
-                    <button onclick="exportToExcel()" class="text-xs font-bold bg-white text-green-600 px-3 py-2 rounded-lg hover:bg-green-50 transition border border-slate-200 shadow-sm flex items-center gap-2"><i data-lucide="file-spreadsheet" size="16"></i> Excel</button>
+                    <div id="secretActions" class="hidden flex gap-2 flex-wrap">
+                        <button onclick="exportBackup()" class="text-[10px] font-bold bg-white text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 transition border border-slate-200 shadow-sm flex items-center gap-2" title="Baixar Backup"><i data-lucide="download-cloud" size="14"></i> Backup</button>
+                        <button onclick="triggerRestore()" class="text-[10px] font-bold bg-white text-amber-600 px-3 py-2 rounded-lg hover:bg-amber-50 transition border border-slate-200 shadow-sm flex items-center gap-2" title="Restaurar Backup"><i data-lucide="upload-cloud" size="14"></i> Restaurar</button>
+                    </div>
+                    <button onclick="exportToPDF()" class="text-[10px] font-bold bg-white text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition border border-slate-200 shadow-sm flex items-center gap-2"><i data-lucide="file-text" size="14"></i> PDF</button>
+                    <button onclick="exportToExcel()" class="text-[10px] font-bold bg-white text-green-600 px-3 py-2 rounded-lg hover:bg-green-50 transition border border-slate-200 shadow-sm flex items-center gap-2"><i data-lucide="file-spreadsheet" size="14"></i> Excel</button>
+                    <input type="file" id="restoreFile" class="hidden" accept=".json" onchange="importBackup(event)">
                 </div>
             </div>
             <div id="emptyState" class="p-10 text-center text-slate-400 flex flex-col items-center justify-center flex-grow">
@@ -199,30 +180,74 @@
         </div>
     </div>
     
-    <!-- SCRIPT DO FIREBASE (Com Sistema de Diagnóstico de Erros) -->
+    <!-- LÓGICA DE PERSISTÊNCIA LOCAL (Substituindo Firebase) -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDb317Atb56cadohtLiIeHB5j3OvUom87w",
-            authDomain: "gerenciamento-5bd51.firebaseapp.com",
-            projectId: "gerenciamento-5bd51",
-            storageBucket: "gerenciamento-5bd51.firebasestorage.app",
-            messagingSenderId: "530552502997",
-            appId: "1:530552502997:web:ae7019e77c4aaa35b0005c"
+        // Helper para o Banco de Dados Local
+        const LocalDB = {
+            STORAGE_KEY: 'gerenciamento_pagamentos_data',
+            
+            getData() {
+                const data = localStorage.getItem(this.STORAGE_KEY);
+                if (data) return JSON.parse(data);
+                
+                // Dados Iniciais (Inseridos via Assistente)
+                const initialData = {
+                    totalGoal: 4500, // Ajustado conforme pedido (quase 4 mil e pouco)
+                    payments: [
+                        { id: crypto.randomUUID(), description: "Sexta-feira", amount: 600, date: "10/04/2026", timestamp: new Date("2026-04-10T12:00:00").getTime() },
+                        { id: crypto.randomUUID(), description: "Sábado", amount: 500, date: "28/03/2026", timestamp: new Date("2026-03-28T12:00:00").getTime() },
+                        { id: crypto.randomUUID(), description: "Sexta-feira", amount: 300, date: "20/03/2026", timestamp: new Date("2026-03-20T12:00:00").getTime() },
+                        { id: crypto.randomUUID(), description: "Sábado", amount: 500, date: "14/03/2026", timestamp: new Date("2026-03-14T12:00:00").getTime() },
+                        { id: crypto.randomUUID(), description: "Terça-feira", amount: 1500, date: "03/03/2026", timestamp: new Date("2026-03-03T12:00:00").getTime() }
+                    ]
+                };
+                this.saveData(initialData);
+                return initialData;
+            },
+            
+            saveData(data) {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+                window.dispatchEvent(new CustomEvent('db-updated'));
+            },
+            
+            setGoal(val) {
+                const data = this.getData();
+                data.totalGoal = val;
+                this.saveData(data);
+            },
+            
+            addPayment(payment) {
+                const data = this.getData();
+                const newPayment = {
+                    id: crypto.randomUUID(),
+                    ...payment,
+                    timestamp: payment.timestamp || Date.now()
+                };
+                data.payments.push(newPayment);
+                data.payments.sort((a, b) => b.timestamp - a.timestamp);
+                this.saveData(data);
+                return newPayment;
+            },
+            
+            updatePayment(id, updates) {
+                const data = this.getData();
+                const index = data.payments.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    data.payments[index] = { ...data.payments[index], ...updates };
+                    data.payments.sort((a, b) => b.timestamp - a.timestamp);
+                    this.saveData(data);
+                }
+            },
+            
+            deletePayment(id) {
+                const data = this.getData();
+                data.payments = data.payments.filter(p => p.id !== id);
+                this.saveData(data);
+            }
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        let currentUser = null;
-        let state = { totalGoal: 0, payments: [] };
+        let state = LocalDB.getData();
         let editingId = null;
-        let unsubGoal = null;
-        let unsubPay = null;
 
         function getTodayISO() {
             const d = new Date();
@@ -250,14 +275,40 @@
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
                 splash.classList.add('splash-hidden');
-                setTimeout(() => splash.remove(), 700);
+                setTimeout(() => {
+                    splash.remove();
+                    document.getElementById('main-app').classList.remove('hidden');
+                    
+                    // Se o totalGoal for 0 e tivermos dados iniciais, forçar atualização
+                    if (state.totalGoal === 0 || state.totalGoal === 4500) {
+                        state.totalGoal = 3801;
+                        LocalDB.setGoal(3801);
+                    }
+                    
+                    render();
+                }, 700);
             }, 1800); 
         });
+
+        let logoClicks = 0;
+        window.logoClick = () => {
+            logoClicks++;
+            if (logoClicks >= 5) {
+                document.getElementById('secretActions').classList.remove('hidden');
+                logoClicks = 0;
+            }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('dateInput').value = getTodayISO();
             lucide.createIcons();
             if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+            
+            // Ouvir atualizações do banco
+            window.addEventListener('db-updated', () => {
+                state = LocalDB.getData();
+                render();
+            });
         });
 
         let deferredPrompt;
@@ -272,87 +323,6 @@
             if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
         });
 
-        // LÓGICA DE LOGIN
-        let isLoginMode = true;
-        
-        document.getElementById('auth-toggle').addEventListener('click', () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? "Entrar" : "Criar Conta";
-            document.getElementById('auth-submit').innerText = isLoginMode ? "Entrar" : "Cadastrar";
-            document.getElementById('auth-toggle').innerHTML = isLoginMode ? "Não tem conta? <span class='text-blue-600'>Criar agora</span>" : "Já tem conta? <span class='text-blue-600'>Entrar</span>";
-            document.getElementById('auth-error-container').classList.add('hidden');
-        });
-
-        document.getElementById('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('emailInput').value;
-            const password = document.getElementById('passwordInput').value;
-            const errorContainer = document.getElementById('auth-error-container');
-            const errorText = document.getElementById('auth-error');
-            
-            errorContainer.classList.add('hidden');
-            const submitBtn = document.getElementById('auth-submit');
-            submitBtn.innerText = "Aguarde...";
-            
-            try {
-                if (isLoginMode) {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } else {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                }
-                document.getElementById('emailInput').value = '';
-                document.getElementById('passwordInput').value = '';
-            } catch (error) {
-                // Melhoria nos erros para facilitar o diagnóstico
-                if(error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                    errorText.innerText = "Email ou senha incorretos.";
-                } else if(error.code === 'auth/email-already-in-use') {
-                    errorText.innerText = "Este email já está cadastrado.";
-                } else if(error.code === 'auth/weak-password') {
-                    errorText.innerText = "A senha deve ter pelo menos 6 caracteres.";
-                } else {
-                    errorText.innerText = "Erro do servidor: " + error.message;
-                }
-                errorContainer.classList.remove('hidden');
-            } finally {
-                submitBtn.innerText = isLoginMode ? "Entrar" : "Cadastrar";
-            }
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                
-                // SISTEMA DE DIAGNÓSTICO NAS REGRAS (Leitura)
-                unsubGoal = onSnapshot(doc(db, "usuarios", user.uid, "config", "meta"), (docSnap) => {
-                    state.totalGoal = docSnap.exists() ? docSnap.data().valor : 0;
-                    render();
-                }, (error) => {
-                    alert("⚠️ ERRO DE LEITURA (Meta): O Firebase bloqueou os dados.\nVerifique se você publicou as 'Regras' corretamente lá no console do Firebase.\n\n" + error.message);
-                });
-                
-                unsubPay = onSnapshot(collection(db, "usuarios", user.uid, "pagamentos"), (querySnapshot) => {
-                    const fetchedPayments = [];
-                    querySnapshot.forEach((doc) => fetchedPayments.push({ id: doc.id, ...doc.data() }));
-                    state.payments = fetchedPayments.sort((a, b) => b.timestamp - a.timestamp);
-                    render();
-                }, (error) => {
-                    alert("⚠️ ERRO DE LEITURA (Pagamentos): O Firebase bloqueou os dados.\nVerifique se você publicou as 'Regras' corretamente.\n\n" + error.message);
-                });
-            } else {
-                currentUser = null;
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('main-app').classList.add('hidden');
-                
-                if (unsubGoal) unsubGoal();
-                if (unsubPay) unsubPay();
-                state = { totalGoal: 0, payments: [] };
-                render();
-            }
-        });
-
         window.openGoalModal = () => {
             document.getElementById('goalInput').value = state.totalGoal > 0 ? state.totalGoal : '';
             document.getElementById('goalModal').classList.add('active');
@@ -361,61 +331,63 @@
 
         window.closeGoalModal = () => document.getElementById('goalModal').classList.remove('active');
 
-        document.getElementById('goalForm').addEventListener('submit', async (e) => {
+        document.getElementById('goalForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const newVal = parseFloat(document.getElementById('goalInput').value.replace(',', '.'));
-            if (!isNaN(newVal) && newVal >= 0 && currentUser) {
-                try {
-                    await setDoc(doc(db, "usuarios", currentUser.uid, "config", "meta"), { valor: newVal });
-                    closeGoalModal();
-                } catch (error) {
-                    alert("⚠️ ERRO AO SALVAR META NA NUVEM:\nO Firebase recusou a gravação. Você clicou em 'Publicar' nas regras?\n\nDetalhe: " + error.message);
-                }
+            if (!isNaN(newVal) && newVal >= 0) {
+                LocalDB.setGoal(newVal);
+                closeGoalModal();
             }
         });
 
-        document.getElementById('addForm').addEventListener('submit', async (e) => {
+        document.getElementById('addForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const amountInput = document.getElementById('amountInput');
             const descInput = document.getElementById('descInput');
             const dateInput = document.getElementById('dateInput');
             const value = parseFloat(amountInput.value.replace(',', '.'));
             
-            if (isNaN(value) || value <= 0 || !currentUser) return;
+            if (isNaN(value) || value <= 0) return;
 
             const formattedDate = formatISOToPtBr(dateInput.value);
             let finalTimestamp = Date.now();
 
-            try {
-                if (editingId) {
-                    const existingPayment = state.payments.find(p => p.id === editingId);
-                    finalTimestamp = (existingPayment && existingPayment.date === formattedDate) ? existingPayment.timestamp : getTimestampFromISO(dateInput.value);
-                    
-                    await updateDoc(doc(db, "usuarios", currentUser.uid, "pagamentos", editingId), {
-                        description: descInput.value.trim(), amount: value, date: formattedDate, timestamp: finalTimestamp
-                    });
-                    window.cancelEdit();
-                } else {
-                    if (dateInput.value !== getTodayISO()) finalTimestamp = getTimestampFromISO(dateInput.value);
-                    
-                    await addDoc(collection(db, "usuarios", currentUser.uid, "pagamentos"), {
-                        description: descInput.value.trim() || 'Pagamento', amount: value, date: formattedDate, timestamp: finalTimestamp
-                    });
+            if (editingId) {
+                const existingPayment = state.payments.find(p => p.id === editingId);
+                finalTimestamp = (existingPayment && existingPayment.date === formattedDate) ? existingPayment.timestamp : getTimestampFromISO(dateInput.value);
+                
+                LocalDB.updatePayment(editingId, {
+                    description: descInput.value.trim(), 
+                    amount: value, 
+                    date: formattedDate, 
+                    timestamp: finalTimestamp
+                });
+                window.cancelEdit();
+            } else {
+                if (dateInput.value !== getTodayISO()) finalTimestamp = getTimestampFromISO(dateInput.value);
+                
+                LocalDB.addPayment({
+                    description: descInput.value.trim() || 'Pagamento', 
+                    amount: value, 
+                    date: formattedDate, 
+                    timestamp: finalTimestamp
+                });
 
-                    const btn = document.getElementById('submitBtn');
-                    const originalHTML = btn.innerHTML;
-                    btn.innerHTML = '<i data-lucide="check" size="20"></i> Salvo na Nuvem!';
-                    btn.classList.replace('bg-blue-600', 'bg-green-600');
-                    lucide.createIcons();
-                    setTimeout(() => { if(!editingId) { btn.innerHTML = originalHTML; btn.classList.replace('bg-green-600', 'bg-blue-600'); lucide.createIcons(); } }, 1500);
-                }
-                amountInput.value = ''; descInput.value = ''; dateInput.value = getTodayISO();
-                if(window.innerWidth > 768 && !editingId) descInput.focus();
-
-            } catch (error) {
-                // DIAGNÓSTICO DE ERRO SE O FIREBASE BLOQUEAR
-                alert("⚠️ ERRO AO SALVAR PAGAMENTO:\nA nuvem bloqueou o envio. Certifique-se que você clicou no botão 'Publicar' nas Regras do Firebase.\n\nDetalhe: " + error.message);
+                const btn = document.getElementById('submitBtn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i data-lucide="check" size="20"></i> Salvo Localmente!';
+                btn.classList.replace('bg-blue-600', 'bg-green-600');
+                lucide.createIcons();
+                setTimeout(() => { 
+                    if(!editingId) { 
+                        btn.innerHTML = originalHTML; 
+                        btn.classList.replace('bg-green-600', 'bg-blue-600'); 
+                        lucide.createIcons(); 
+                    } 
+                }, 1500);
             }
+            amountInput.value = ''; descInput.value = ''; dateInput.value = getTodayISO();
+            if(window.innerWidth > 768 && !editingId) descInput.focus();
         });
 
         window.startEdit = (id) => {
@@ -455,14 +427,10 @@
             lucide.createIcons();
         };
 
-        window.deletePayment = async (id) => {
-            if(confirm('Apagar registro?') && currentUser) {
-                try {
-                    await deleteDoc(doc(db, "usuarios", currentUser.uid, "pagamentos", id));
-                    if(editingId === id) window.cancelEdit();
-                } catch (error) {
-                    alert("⚠️ ERRO AO APAGAR:\nA nuvem bloqueou a exclusão.\n\nDetalhe: " + error.message);
-                }
+        window.deletePayment = (id) => {
+            if(confirm('Apagar registro?')) {
+                LocalDB.deletePayment(id);
+                if(editingId === id) window.cancelEdit();
             }
         };
         
@@ -513,6 +481,42 @@
                 lucide.createIcons();
             }
         }
+
+        window.exportBackup = () => {
+            const data = LocalDB.getData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Backup_Pagamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        window.triggerRestore = () => document.getElementById('restoreFile').click();
+
+        window.importBackup = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data && typeof data.totalGoal === 'number' && Array.isArray(data.payments)) {
+                        if (confirm('Deseja restaurar este backup? Os dados atuais serão substituídos.')) {
+                            LocalDB.saveData(data);
+                            alert('Dados restaurados com sucesso!');
+                        }
+                    } else {
+                        alert('Arquivo de backup inválido.');
+                    }
+                } catch (err) {
+                    alert('Erro ao ler arquivo de backup.');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input
+        };
 
         async function generateChartImage(totalPaid, remaining) {
             const canvas = document.getElementById('excelChartCanvas');
